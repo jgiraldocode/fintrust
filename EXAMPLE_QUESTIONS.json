@@ -1,0 +1,63 @@
+[
+  {
+    "questionText": "How many unique phone numbers are connected to verified persons?",
+    "graphJson": "{\"nodes\":[{\"id\":\"person1\",\"label\":\"Alice Johnson\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"person2\",\"label\":\"Bob Smith\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"phone1\",\"label\":\"+1 555-0101\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"phone2\",\"label\":\"+1 555-0102\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"phone3\",\"label\":\"+1 555-0103\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"email1\",\"label\":\"alice@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"email2\",\"label\":\"bob@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"location1\",\"label\":\"New York, NY\",\"type\":\"location\",\"status\":\"verified\"}],\"links\":[{\"source\":\"person1\",\"target\":\"phone1\",\"strength\":0.95},{\"source\":\"person1\",\"target\":\"phone3\",\"strength\":0.85},{\"source\":\"person2\",\"target\":\"phone2\",\"strength\":0.95},{\"source\":\"person1\",\"target\":\"email1\",\"strength\":0.9},{\"source\":\"person2\",\"target\":\"email2\",\"strength\":0.9},{\"source\":\"person1\",\"target\":\"location1\",\"strength\":0.8},{\"source\":\"person2\",\"target\":\"location1\",\"strength\":0.75}]}",
+    "options": [
+      "1 phone number",
+      "2 phone numbers",
+      "3 phone numbers",
+      "4 phone numbers"
+    ],
+    "correctAnswer": 2,
+    "tip": "Count the phone nodes that have connections to person nodes. Alice is connected to 2 phones and Bob to 1 phone, making 3 total unique phone numbers."
+  },
+  {
+    "questionText": "Which person has connections to the most different types of data?",
+    "graphJson": "{\"nodes\":[{\"id\":\"person1\",\"label\":\"Alice Johnson\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"person2\",\"label\":\"Bob Smith\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"phone1\",\"label\":\"+1 555-0101\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"email1\",\"label\":\"alice@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"id1\",\"label\":\"ID-12345\",\"type\":\"id\",\"status\":\"verified\"},{\"id\":\"device1\",\"label\":\"iPhone 14\",\"type\":\"device\",\"status\":\"verified\"},{\"id\":\"location1\",\"label\":\"New York, NY\",\"type\":\"location\",\"status\":\"verified\"},{\"id\":\"phone2\",\"label\":\"+1 555-0202\",\"type\":\"phone\",\"status\":\"verified\"}],\"links\":[{\"source\":\"person1\",\"target\":\"phone1\",\"strength\":0.95},{\"source\":\"person1\",\"target\":\"email1\",\"strength\":0.9},{\"source\":\"person1\",\"target\":\"id1\",\"strength\":0.95},{\"source\":\"person1\",\"target\":\"device1\",\"strength\":0.85},{\"source\":\"person1\",\"target\":\"location1\",\"strength\":0.8},{\"source\":\"person2\",\"target\":\"phone2\",\"strength\":0.95}]}",
+    "options": [
+      "Alice Johnson",
+      "Bob Smith",
+      "Both have the same",
+      "Cannot determine"
+    ],
+    "correctAnswer": 0,
+    "tip": "Alice has 5 different types of connections (phone, email, ID, device, location), while Bob only has 1 (phone). More diverse connections create a stronger identity profile."
+  },
+  {
+    "questionText": "What could be a potential red flag in this identity graph?",
+    "graphJson": "{\"nodes\":[{\"id\":\"person1\",\"label\":\"John Doe\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"person2\",\"label\":\"Jane Smith\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"person3\",\"label\":\"Mike Johnson\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"phone1\",\"label\":\"+1 555-9999\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"email1\",\"label\":\"john@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"email2\",\"label\":\"jane@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"email3\",\"label\":\"mike@email.com\",\"type\":\"email\",\"status\":\"verified\"}],\"links\":[{\"source\":\"person1\",\"target\":\"phone1\",\"strength\":0.95},{\"source\":\"person2\",\"target\":\"phone1\",\"strength\":0.95},{\"source\":\"person3\",\"target\":\"phone1\",\"strength\":0.95},{\"source\":\"person1\",\"target\":\"email1\",\"strength\":0.9},{\"source\":\"person2\",\"target\":\"email2\",\"strength\":0.9},{\"source\":\"person3\",\"target\":\"email3\",\"strength\":0.9}]}",
+    "options": [
+      "Three people sharing one email address",
+      "Three people sharing one phone number",
+      "People with different last names",
+      "Too many email addresses"
+    ],
+    "correctAnswer": 1,
+    "tip": "When multiple distinct individuals share the same phone number, it could indicate fraud, identity theft, or synthetic identity creation. This is a common pattern to watch for in fraud detection."
+  },
+  {
+    "questionText": "How many total connections (links) are in this identity graph?",
+    "graphJson": "{\"nodes\":[{\"id\":\"person1\",\"label\":\"Sarah Connor\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"phone1\",\"label\":\"+1 555-1234\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"phone2\",\"label\":\"+1 555-5678\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"email1\",\"label\":\"sarah@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"location1\",\"label\":\"Los Angeles, CA\",\"type\":\"location\",\"status\":\"verified\"},{\"id\":\"device1\",\"label\":\"Samsung S21\",\"type\":\"device\",\"status\":\"verified\"}],\"links\":[{\"source\":\"person1\",\"target\":\"phone1\",\"strength\":0.95},{\"source\":\"person1\",\"target\":\"phone2\",\"strength\":0.85},{\"source\":\"person1\",\"target\":\"email1\",\"strength\":0.9},{\"source\":\"person1\",\"target\":\"location1\",\"strength\":0.8},{\"source\":\"person1\",\"target\":\"device1\",\"strength\":0.9},{\"source\":\"device1\",\"target\":\"location1\",\"strength\":0.7}]}",
+    "options": [
+      "4 connections",
+      "5 connections",
+      "6 connections",
+      "7 connections"
+    ],
+    "correctAnswer": 2,
+    "tip": "Count all the lines (links) in the graph, not just the ones connected to the person. The device and location also have a connection between them, making 6 total connections."
+  },
+  {
+    "questionText": "Which node type appears most frequently in this network?",
+    "graphJson": "{\"nodes\":[{\"id\":\"person1\",\"label\":\"Tom Brady\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"phone1\",\"label\":\"+1 555-1111\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"phone2\",\"label\":\"+1 555-2222\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"phone3\",\"label\":\"+1 555-3333\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"email1\",\"label\":\"tom@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"email2\",\"label\":\"brady@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"location1\",\"label\":\"Tampa, FL\",\"type\":\"location\",\"status\":\"verified\"}],\"links\":[{\"source\":\"person1\",\"target\":\"phone1\",\"strength\":0.95},{\"source\":\"person1\",\"target\":\"phone2\",\"strength\":0.9},{\"source\":\"person1\",\"target\":\"phone3\",\"strength\":0.85},{\"source\":\"person1\",\"target\":\"email1\",\"strength\":0.9},{\"source\":\"person1\",\"target\":\"email2\",\"strength\":0.85},{\"source\":\"person1\",\"target\":\"location1\",\"strength\":0.8}]}",
+    "options": [
+      "Person",
+      "Phone",
+      "Email",
+      "Location"
+    ],
+    "correctAnswer": 1,
+    "tip": "Count each node type: 1 person, 3 phones, 2 emails, 1 location. Phone numbers appear most frequently, which is common as people often have multiple phone numbers (work, personal, etc.)."
+  }
+]
+

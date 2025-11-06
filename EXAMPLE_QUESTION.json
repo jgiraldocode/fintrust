@@ -1,0 +1,13 @@
+{
+  "questionText": "How many unique phone numbers are connected to verified persons?",
+  "graphJson": "{\"nodes\":[{\"id\":\"person1\",\"label\":\"Alice Johnson\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"person2\",\"label\":\"Bob Smith\",\"type\":\"person\",\"status\":\"verified\"},{\"id\":\"phone1\",\"label\":\"+1 555-0101\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"phone2\",\"label\":\"+1 555-0102\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"phone3\",\"label\":\"+1 555-0103\",\"type\":\"phone\",\"status\":\"verified\"},{\"id\":\"email1\",\"label\":\"alice@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"email2\",\"label\":\"bob@email.com\",\"type\":\"email\",\"status\":\"verified\"},{\"id\":\"location1\",\"label\":\"New York, NY\",\"type\":\"location\",\"status\":\"verified\"}],\"links\":[{\"source\":\"person1\",\"target\":\"phone1\",\"strength\":0.95},{\"source\":\"person1\",\"target\":\"phone3\",\"strength\":0.85},{\"source\":\"person2\",\"target\":\"phone2\",\"strength\":0.95},{\"source\":\"person1\",\"target\":\"email1\",\"strength\":0.9},{\"source\":\"person2\",\"target\":\"email2\",\"strength\":0.9},{\"source\":\"person1\",\"target\":\"location1\",\"strength\":0.8},{\"source\":\"person2\",\"target\":\"location1\",\"strength\":0.75}]}",
+  "options": [
+    "1 phone number",
+    "2 phone numbers",
+    "3 phone numbers",
+    "4 phone numbers"
+  ],
+  "correctAnswer": 2,
+  "tip": "Count the phone nodes that have connections to person nodes. Alice is connected to 2 phones and Bob to 1 phone, making 3 total unique phone numbers."
+}
+

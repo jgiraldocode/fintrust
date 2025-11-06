@@ -1,0 +1,22 @@
+{
+  "name": "quiz-game-app",
+  "version": "1.0.0",
+  "description": "Interactive quiz game with QR registration and graph-based questions",
+  "scripts": {
+    "install-all": "cd backend && npm install && cd ../frontend && npm install",
+    "backend": "cd backend && npm start",
+    "frontend": "cd frontend && npm run dev",
+    "dev": "echo 'Please run backend and frontend in separate terminals' && echo 'Terminal 1: npm run backend' && echo 'Terminal 2: npm run frontend'"
+  },
+  "keywords": [
+    "quiz",
+    "game",
+    "graph",
+    "d3",
+    "vue",
+    "education"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+
