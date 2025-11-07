@@ -7,11 +7,11 @@
         <div v-else class="text-6xl mb-4">💪</div>
 
         <h2 class="text-4xl font-bold mb-4" :class="isSuccess ? 'text-green-600' : 'text-orange-600'">
-          {{ isSuccess ? 'Congratulations!' : 'Good Luck Next Time!' }}
+          {{ isSuccess ? '¡Felicitaciones!' : '¡Buena Suerte la Próxima!' }}
         </h2>
 
         <p class="text-xl text-gray-600">
-          {{ userName }}, you've completed the quiz!
+          {{ userName }}, ¡has completado el cuestionario!
         </p>
       </div>
 
@@ -19,14 +19,14 @@
       <div class="bg-gradient-to-br from-primary-50 to-indigo-50 rounded-xl p-8 mb-8">
         <div class="grid grid-cols-2 gap-6">
           <div class="bg-white rounded-lg p-6 shadow-md">
-            <p class="text-gray-600 text-lg mb-2">Correct Answers</p>
+            <p class="text-gray-600 text-lg mb-2">Respuestas Correctas</p>
             <p class="text-5xl font-bold text-green-600">
               {{ score.correctAnswers }}
             </p>
           </div>
 
           <div class="bg-white rounded-lg p-6 shadow-md">
-            <p class="text-gray-600 text-lg mb-2">Total Questions</p>
+            <p class="text-gray-600 text-lg mb-2">Total de Preguntas</p>
             <p class="text-5xl font-bold text-primary-600">
               {{ score.totalAnswers }}
             </p>
@@ -34,7 +34,7 @@
         </div>
 
         <div class="mt-6 bg-white rounded-lg p-6 shadow-md">
-          <p class="text-gray-600 text-lg mb-2">Score Percentage</p>
+          <p class="text-gray-600 text-lg mb-2">Porcentaje de Aciertos</p>
           <p class="text-5xl font-bold text-primary-700">
             {{ scorePercentage }}%
           </p>
@@ -51,11 +51,11 @@
       <!-- Action Buttons -->
       <div class="space-y-4">
         <button @click="viewLeaderboard" class="btn-primary w-full">
-          View Leaderboard 🏆
+          Ver Tabla de Clasificación 🏆
         </button>
 
         <button @click="goHome" class="btn-secondary w-full">
-          Back to Home
+          Volver al Inicio
         </button>
       </div>
     </div>
@@ -91,13 +91,13 @@ const encouragementMessage = computed(() => {
   const percentage = scorePercentage.value
 
   if (percentage >= 90) {
-    return "Outstanding performance! You have an excellent understanding of graph patterns! 🌟"
+    return "¡Desempeño sobresaliente! ¡Tienes una excelente comprensión de los patrones de grafos! 🌟"
   } else if (percentage >= 70) {
-    return "Great job! You demonstrated strong analytical skills! Keep it up! 💪"
+    return "¡Buen trabajo! ¡Demostraste fuertes habilidades analíticas! ¡Sigue así! 💪"
   } else if (percentage >= 50) {
-    return "Good effort! You're on the right track. Practice makes perfect! 📈"
+    return "¡Buen esfuerzo! Vas por buen camino. ¡La práctica hace al maestro! 📈"
   } else {
-    return "Don't give up! Review the patterns and try again. You'll do better next time! 🚀"
+    return "¡No te rindas! Revisa los patrones e inténtalo de nuevo. ¡Lo harás mejor la próxima vez! 🚀"
   }
 })
 

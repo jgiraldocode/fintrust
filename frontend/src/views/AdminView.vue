@@ -5,30 +5,30 @@
       <div class="card mb-6">
         <div class="flex justify-between items-center">
           <h1 class="text-3xl font-bold text-gray-900">
-            🔧 Admin Panel
+            🔧 Panel de Administración
           </h1>
           <button @click="goHome" class="btn-secondary">
-            ← Back
+            ← Volver
           </button>
         </div>
       </div>
 
       <!-- Login Section -->
       <div v-if="!isAuthenticated" class="card max-w-md mx-auto">
-        <h2 class="text-2xl font-bold mb-6">Admin Login</h2>
+        <h2 class="text-2xl font-bold mb-6">Iniciar Sesión como Administrador</h2>
         <form @submit.prevent="handleLogin" class="space-y-4">
           <div>
-            <label class="block text-lg font-medium mb-2">Password</label>
+            <label class="block text-lg font-medium mb-2">Contraseña</label>
             <input
               v-model="password"
               type="password"
               class="input"
-              placeholder="Enter admin password"
+              placeholder="Ingresa la contraseña de administrador"
               required
             />
           </div>
           <button type="submit" class="btn-primary w-full" :disabled="loading">
-            {{ loading ? 'Logging in...' : 'Login' }}
+            {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
           </button>
         </form>
         <div v-if="error" class="mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -40,7 +40,7 @@
       <div v-else class="space-y-6">
         <!-- Game Controls -->
         <div class="card">
-          <h2 class="text-2xl font-bold mb-4">Game Controls</h2>
+          <h2 class="text-2xl font-bold mb-4">Control del Juego</h2>
           <div class="flex items-center gap-4">
             <button
               @click="toggleGameState(true)"
@@ -48,7 +48,7 @@
               class="btn-success flex-1"
               :class="{ 'opacity-50 cursor-not-allowed': gameState.isActive }"
             >
-              ▶️ Start Game
+              ▶️ Iniciar Juego
             </button>
             <button
               @click="toggleGameState(false)"
@@ -56,13 +56,13 @@
               class="btn-danger flex-1"
               :class="{ 'opacity-50 cursor-not-allowed': !gameState.isActive }"
             >
-              ⏸️ Stop Game
+              ⏸️ Detener Juego
             </button>
           </div>
           <p class="mt-4 text-lg">
-            Status:
+            Estado:
             <span :class="gameState.isActive ? 'text-green-600 font-bold' : 'text-red-600 font-bold'">
-              {{ gameState.isActive ? '🟢 ACTIVE' : '🔴 INACTIVE' }}
+              {{ gameState.isActive ? '🟢 ACTIVO' : '🔴 INACTIVO' }}
             </span>
           </p>
         </div>
@@ -70,17 +70,17 @@
         <!-- Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="card bg-blue-50">
-            <p class="text-gray-600 mb-2">Total Questions</p>
+            <p class="text-gray-600 mb-2">Total de Preguntas</p>
             <p class="text-4xl font-bold text-blue-600">{{ questions.length }}</p>
           </div>
           <div class="card bg-green-50">
-            <p class="text-gray-600 mb-2">Total Users</p>
+            <p class="text-gray-600 mb-2">Total de Usuarios</p>
             <p class="text-4xl font-bold text-green-600">{{ users.length }}</p>
           </div>
           <div class="card bg-purple-50">
-            <p class="text-gray-600 mb-2">Game Status</p>
+            <p class="text-gray-600 mb-2">Estado del Juego</p>
             <p class="text-2xl font-bold text-purple-600">
-              {{ gameState.isActive ? 'Running' : 'Stopped' }}
+              {{ gameState.isActive ? 'En Curso' : 'Detenido' }}
             </p>
           </div>
         </div>
@@ -88,30 +88,30 @@
         <!-- Questions Management -->
         <div class="card">
           <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-bold">Questions</h2>
+            <h2 class="text-2xl font-bold">Preguntas</h2>
             <button @click="showCreateForm = !showCreateForm" class="btn-primary">
-              {{ showCreateForm ? 'Cancel' : '+ New Question' }}
+              {{ showCreateForm ? 'Cancelar' : '+ Nueva Pregunta' }}
             </button>
           </div>
 
           <!-- Create/Edit Form -->
           <div v-if="showCreateForm || editingQuestion" class="bg-gray-50 rounded-lg p-6 mb-6">
             <h3 class="text-xl font-bold mb-4">
-              {{ editingQuestion ? 'Edit Question' : 'Create New Question' }}
+              {{ editingQuestion ? 'Editar Pregunta' : 'Crear Nueva Pregunta' }}
             </h3>
             <form @submit.prevent="saveQuestion" class="space-y-4">
               <div>
-                <label class="block text-lg font-medium mb-2">Question Text</label>
+                <label class="block text-lg font-medium mb-2">Texto de la Pregunta</label>
                 <textarea
                   v-model="questionForm.questionText"
                   class="input min-h-[80px]"
-                  placeholder="What pattern do you see in this graph?"
+                  placeholder="¿Qué patrón ves en este grafo?"
                   required
                 ></textarea>
               </div>
 
               <div>
-                <label class="block text-lg font-medium mb-2">Graph JSON</label>
+                <label class="block text-lg font-medium mb-2">JSON del Grafo</label>
                 <textarea
                   v-model="questionForm.graphJson"
                   class="input font-mono text-sm min-h-[200px]"
@@ -119,18 +119,18 @@
                   required
                 ></textarea>
                 <button type="button" @click="previewGraph" class="mt-2 text-primary-600 hover:text-primary-700">
-                  👁️ Preview Graph
+                  👁️ Vista Previa del Grafo
                 </button>
               </div>
 
               <div>
-                <label class="block text-lg font-medium mb-2">Options</label>
+                <label class="block text-lg font-medium mb-2">Opciones</label>
                 <div class="space-y-2">
                   <div v-for="(option, index) in questionForm.options" :key="index" class="flex gap-2">
                     <input
                       v-model="questionForm.options[index]"
                       class="input flex-1"
-                      :placeholder="`Option ${index + 1}`"
+                      :placeholder="`Opción ${index + 1}`"
                       required
                     />
                     <button
@@ -144,34 +144,34 @@
                   </div>
                 </div>
                 <button type="button" @click="addOption" class="mt-2 text-primary-600 hover:text-primary-700">
-                  + Add Option
+                  + Agregar Opción
                 </button>
               </div>
 
               <div>
-                <label class="block text-lg font-medium mb-2">Correct Answer</label>
+                <label class="block text-lg font-medium mb-2">Respuesta Correcta</label>
                 <select v-model.number="questionForm.correctAnswer" class="input" required>
                   <option v-for="(option, index) in questionForm.options" :key="index" :value="index">
-                    Option {{ index + 1 }}: {{ option || '(empty)' }}
+                    Opción {{ index + 1 }}: {{ option || '(vacío)' }}
                   </option>
                 </select>
               </div>
 
               <div>
-                <label class="block text-lg font-medium mb-2">Tip (optional)</label>
+                <label class="block text-lg font-medium mb-2">Consejo (opcional)</label>
                 <textarea
                   v-model="questionForm.tip"
                   class="input min-h-[80px]"
-                  placeholder="Helpful tip for learning from this question..."
+                  placeholder="Consejo útil para aprender de esta pregunta..."
                 ></textarea>
               </div>
 
               <div class="flex gap-4">
                 <button type="submit" class="btn-success flex-1" :disabled="loading">
-                  {{ loading ? 'Saving...' : editingQuestion ? 'Update' : 'Create' }}
+                  {{ loading ? 'Guardando...' : editingQuestion ? 'Actualizar' : 'Crear' }}
                 </button>
                 <button type="button" @click="cancelEdit" class="btn-secondary flex-1">
-                  Cancel
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -181,14 +181,14 @@
           <div v-if="showGraphPreview" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" @click="showGraphPreview = false">
             <div class="bg-white rounded-xl p-6 max-w-4xl w-full" @click.stop>
               <div class="flex justify-between items-center mb-4">
-                <h3 class="text-xl font-bold">Graph Preview</h3>
+                <h3 class="text-xl font-bold">Vista Previa del Grafo</h3>
                 <button @click="showGraphPreview = false" class="text-gray-500 hover:text-gray-700 text-2xl">
                   ✕
                 </button>
               </div>
               <NetworkGraph v-if="previewGraphData" :graph-data="previewGraphData" />
               <div v-else class="text-red-600 p-4">
-                Invalid graph JSON format
+                Formato JSON del grafo inválido
               </div>
             </div>
           </div>
@@ -204,37 +204,37 @@
                 <div class="flex-1">
                   <h4 class="font-bold text-lg mb-2">{{ question.questionText }}</h4>
                   <div class="text-sm text-gray-600 space-y-1">
-                    <p>Options: {{ question.options.length }}</p>
-                    <p>Correct: Option {{ question.correctAnswer + 1 }}</p>
-                    <p v-if="question.tip" class="text-gray-500">Tip: {{ question.tip }}</p>
+                    <p>Opciones: {{ question.options.length }}</p>
+                    <p>Correcta: Opción {{ question.correctAnswer + 1 }}</p>
+                    <p v-if="question.tip" class="text-gray-500">Consejo: {{ question.tip }}</p>
                   </div>
                 </div>
                 <div class="flex gap-2 flex-shrink-0">
                   <button @click="editQuestion(question)" class="btn-secondary px-4">
-                    ✏️ Edit
+                    ✏️ Editar
                   </button>
                   <button @click="deleteQuestionConfirm(question)" class="btn-danger px-4">
-                    🗑️ Delete
+                    🗑️ Eliminar
                   </button>
                 </div>
               </div>
             </div>
 
             <div v-if="questions.length === 0" class="text-center py-12 text-gray-500">
-              No questions yet. Create your first question!
+              Aún no hay preguntas. ¡Crea tu primera pregunta!
             </div>
           </div>
         </div>
 
         <!-- Users List -->
         <div class="card">
-          <h2 class="text-2xl font-bold mb-4">Registered Users</h2>
+          <h2 class="text-2xl font-bold mb-4">Usuarios Registrados</h2>
           <div class="overflow-x-auto">
             <table class="w-full">
               <thead>
                 <tr class="border-b-2 border-gray-300">
-                  <th class="text-left py-3 px-4">Name</th>
-                  <th class="text-left py-3 px-4">Registered At</th>
+                  <th class="text-left py-3 px-4">Nombre</th>
+                  <th class="text-left py-3 px-4">Fecha de Registro</th>
                 </tr>
               </thead>
               <tbody>
@@ -245,20 +245,43 @@
               </tbody>
             </table>
             <div v-if="users.length === 0" class="text-center py-8 text-gray-500">
-              No users registered yet.
+              Aún no hay usuarios registrados.
             </div>
           </div>
         </div>
 
         <!-- Danger Zone -->
         <div class="card bg-red-50 border-2 border-red-300">
-          <h2 class="text-2xl font-bold text-red-700 mb-4">⚠️ Danger Zone</h2>
-          <button @click="resetAllScores" class="btn-danger">
-            Reset All Scores
-          </button>
-          <p class="text-sm text-gray-600 mt-2">
-            This will delete all user scores but keep questions and users.
-          </p>
+          <h2 class="text-2xl font-bold text-red-700 mb-4">⚠️ Zona de Peligro</h2>
+
+          <div class="space-y-4">
+            <div class="bg-white rounded-lg p-4 border border-red-200">
+              <button @click="resetAllScores" class="btn-danger w-full mb-2">
+                Reiniciar Todos los Puntajes
+              </button>
+              <p class="text-sm text-gray-600">
+                Esto eliminará todos los puntajes de usuarios pero mantendrá las preguntas y usuarios.
+              </p>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 border border-red-200">
+              <button @click="deleteAllUsersConfirm" class="btn-danger w-full mb-2">
+                🗑️ Eliminar Todos los Usuarios
+              </button>
+              <p class="text-sm text-gray-600">
+                Esto eliminará todos los usuarios registrados y sus puntajes. Las preguntas se mantendrán.
+              </p>
+            </div>
+
+            <div class="bg-white rounded-lg p-4 border border-red-200">
+              <button @click="deleteAllQuestionsConfirm" class="btn-danger w-full mb-2">
+                🗑️ Eliminar Todas las Preguntas
+              </button>
+              <p class="text-sm text-gray-600">
+                Esto eliminará todas las preguntas y sus puntajes asociados. Los usuarios se mantendrán.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -276,6 +299,8 @@ import {
   setGameState,
   getAdminUsers,
   resetScores,
+  deleteAllUsers,
+  deleteAllQuestions,
   getGameState
 } from '@/api'
 import NetworkGraph from '@/components/NetworkGraph.vue'
@@ -314,7 +339,7 @@ const handleLogin = async () => {
     isAuthenticated.value = true
     await loadDashboard()
   } catch (err) {
-    error.value = 'Invalid password'
+    error.value = 'Contraseña inválida'
   } finally {
     loading.value = false
   }
@@ -341,7 +366,7 @@ const toggleGameState = async (isActive) => {
     await setGameState(isActive, password.value)
     gameState.value.isActive = isActive
   } catch (err) {
-    alert('Failed to update game state')
+    alert('No se pudo actualizar el estado del juego')
   }
 }
 
@@ -361,7 +386,7 @@ const previewGraph = () => {
     previewGraphData.value = JSON.parse(questionForm.value.graphJson)
     showGraphPreview.value = true
   } catch (err) {
-    alert('Invalid JSON format')
+    alert('Formato JSON inválido')
   }
 }
 
@@ -387,7 +412,7 @@ const saveQuestion = async () => {
     await loadDashboard()
     cancelEdit()
   } catch (err) {
-    error.value = err.response?.data?.error || 'Failed to save question'
+    error.value = err.response?.data?.error || 'No se pudo guardar la pregunta'
     alert(error.value)
   } finally {
     loading.value = false
@@ -407,12 +432,12 @@ const editQuestion = (question) => {
 }
 
 const deleteQuestionConfirm = async (question) => {
-  if (confirm(`Are you sure you want to delete this question? "${question.questionText}"`)) {
+  if (confirm(`¿Estás seguro de que deseas eliminar esta pregunta? "${question.questionText}"`)) {
     try {
       await deleteQuestion(question.id, password.value)
       await loadDashboard()
     } catch (err) {
-      alert('Failed to delete question')
+      alert('No se pudo eliminar la pregunta')
     }
   }
 }
@@ -430,13 +455,47 @@ const cancelEdit = () => {
 }
 
 const resetAllScores = async () => {
-  if (confirm('Are you sure you want to reset all scores? This cannot be undone!')) {
+  if (confirm('¿Estás seguro de que deseas reiniciar todos los puntajes? ¡Esto no se puede deshacer!')) {
     try {
       await resetScores(password.value)
-      alert('All scores have been reset')
+      alert('Todos los puntajes han sido reiniciados')
     } catch (err) {
-      alert('Failed to reset scores')
+      alert('Error al reiniciar los puntajes')
     }
+  }
+}
+
+const deleteAllUsersConfirm = async () => {
+  const confirmText = '¿Estás ABSOLUTAMENTE SEGURO de que deseas eliminar TODOS LOS USUARIOS?\n\nEsto eliminará:\n- Todos los usuarios registrados\n- Todos sus puntajes\n\n¡Esta acción NO se puede deshacer!\n\nEscribe "ELIMINAR TODO" para confirmar.'
+  const userInput = prompt(confirmText)
+
+  if (userInput === 'ELIMINAR TODO') {
+    try {
+      const response = await deleteAllUsers(password.value)
+      alert(`Se eliminaron ${response.data.deletedCount} usuarios exitosamente`)
+      await loadDashboard()
+    } catch (err) {
+      alert('Error al eliminar usuarios: ' + (err.response?.data?.error || err.message))
+    }
+  } else if (userInput !== null) {
+    alert('Eliminación cancelada. El texto de confirmación no coincide.')
+  }
+}
+
+const deleteAllQuestionsConfirm = async () => {
+  const confirmText = '¿Estás ABSOLUTAMENTE SEGURO de que deseas eliminar TODAS LAS PREGUNTAS?\n\nEsto eliminará:\n- Todas las preguntas\n- Todos los puntajes asociados\n\n¡Esta acción NO se puede deshacer!\n\nEscribe "ELIMINAR TODO" para confirmar.'
+  const userInput = prompt(confirmText)
+
+  if (userInput === 'ELIMINAR TODO') {
+    try {
+      const response = await deleteAllQuestions(password.value)
+      alert(`Se eliminaron ${response.data.deletedCount} preguntas exitosamente`)
+      await loadDashboard()
+    } catch (err) {
+      alert('Error al eliminar preguntas: ' + (err.response?.data?.error || err.message))
+    }
+  } else if (userInput !== null) {
+    alert('Eliminación cancelada. El texto de confirmación no coincide.')
   }
 }
 

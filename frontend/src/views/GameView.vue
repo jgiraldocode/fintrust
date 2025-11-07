@@ -8,20 +8,20 @@
       <div class="text-center">
         <p class="text-xl text-red-600 mb-4">{{ error }}</p>
         <button @click="goHome" class="btn-primary">
-          Back to Home
+          Volver al Inicio
         </button>
       </div>
     </div>
 
     <div v-else-if="!gameStarted" class="card text-center">
       <h2 class="text-3xl font-bold text-primary-700 mb-4">
-        Game Not Active
+        Juego No Activo
       </h2>
       <p class="text-xl text-gray-600 mb-6">
-        Please wait for the admin to start the game.
+        Por favor espera a que el administrador inicie el juego.
       </p>
       <button @click="goHome" class="btn-primary">
-        Back to Home
+        Volver al Inicio
       </button>
     </div>
 
@@ -30,10 +30,10 @@
       <div class="bg-white rounded-lg p-4 shadow-md">
         <div class="flex justify-between items-center mb-2">
           <span class="text-lg font-semibold text-gray-700">
-            Question {{ gameStore.currentQuestionIndex + 1 }} of {{ gameStore.questions.length }}
+            Pregunta {{ gameStore.currentQuestionIndex + 1 }} de {{ gameStore.questions.length }}
           </span>
           <span class="text-lg font-semibold text-primary-600">
-            Score: {{ correctAnswers }}
+            Puntaje: {{ correctAnswers }}
           </span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-3">
@@ -83,16 +83,16 @@
             <span class="text-3xl">{{ answerResult.isCorrect ? '✅' : '❌' }}</span>
             <div>
               <p class="text-xl font-bold mb-2" :class="answerResult.isCorrect ? 'text-green-800' : 'text-red-800'">
-                {{ answerResult.isCorrect ? 'Correct!' : 'Incorrect!' }}
+                {{ answerResult.isCorrect ? '¡Correcto!' : '¡Incorrecto!' }}
               </p>
               <p v-if="answerResult.tip" class="text-lg text-gray-700">
-                <span class="font-semibold">💡 Tip:</span> {{ answerResult.tip }}
+                <span class="font-semibold">💡 Consejo:</span> {{ answerResult.tip }}
               </p>
             </div>
           </div>
 
           <button @click="nextQuestion" class="btn-primary w-full mt-4">
-            {{ hasMoreQuestions ? 'Next Question →' : 'See Results →' }}
+            {{ hasMoreQuestions ? 'Siguiente Pregunta →' : 'Ver Resultados →' }}
           </button>
         </div>
       </div>
@@ -139,10 +139,10 @@ onMounted(async () => {
     gameStarted.value = true
   } catch (err) {
     if (err.response?.status === 403) {
-      error.value = 'Game is not active yet. Please wait for the admin to start.'
+      error.value = 'El juego aún no está activo. Por favor espera a que el administrador lo inicie.'
       gameStarted.value = false
     } else {
-      error.value = err.response?.data?.error || 'Failed to load questions.'
+      error.value = err.response?.data?.error || 'No se pudieron cargar las preguntas.'
     }
   } finally {
     loading.value = false
@@ -174,7 +174,7 @@ const selectAnswer = async (index) => {
       isCorrect: response.data.isCorrect
     })
   } catch (err) {
-    error.value = err.response?.data?.error || 'Failed to submit answer.'
+    error.value = err.response?.data?.error || 'No se pudo enviar la respuesta.'
   }
 }
 

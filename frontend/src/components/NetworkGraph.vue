@@ -2,13 +2,13 @@
   <div class="network-graph-container">
     <div class="graph-controls mb-4 flex justify-center gap-4">
       <button @click="zoomIn" class="btn-secondary">
-        🔍+ Zoom In
+        🔍+ Acercar
       </button>
       <button @click="zoomOut" class="btn-secondary">
-        🔍- Zoom Out
+        🔍- Alejar
       </button>
       <button @click="resetZoom" class="btn-secondary">
-        ↻ Reset
+        ↻ Restablecer
       </button>
     </div>
 

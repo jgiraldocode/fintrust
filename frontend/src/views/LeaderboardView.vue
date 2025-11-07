@@ -3,10 +3,10 @@
     <div class="card max-w-3xl mx-auto">
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-primary-700 mb-2">
-          🏆 Leaderboard
+          🏆 Tabla de Clasificación
         </h1>
         <p class="text-xl text-gray-600">
-          Top performers in the quiz game
+          Los mejores jugadores del cuestionario
         </p>
       </div>
 
@@ -17,7 +17,7 @@
       <div v-else-if="error" class="text-center py-12">
         <p class="text-xl text-red-600 mb-4">{{ error }}</p>
         <button @click="loadLeaderboard" class="btn-primary">
-          Try Again
+          Intentar de Nuevo
         </button>
       </div>
 
@@ -28,14 +28,14 @@
             <div class="flex items-center gap-4">
               <span class="text-3xl">👤</span>
               <div>
-                <p class="text-lg font-bold text-primary-900">Your Rank</p>
+                <p class="text-lg font-bold text-primary-900">Tu Posición</p>
                 <p class="text-2xl font-bold text-primary-700">
                   #{{ currentUserRank.rank }}
                 </p>
               </div>
             </div>
             <div class="text-right">
-              <p class="text-gray-600">Score</p>
+              <p class="text-gray-600">Puntaje</p>
               <p class="text-2xl font-bold text-primary-700">
                 {{ currentUserRank.correctAnswers }}/{{ currentUserRank.totalAnswers }}
               </p>
@@ -66,10 +66,10 @@
                 <div class="flex-1 min-w-0">
                   <p class="font-bold text-lg truncate" :class="entry.id === userStore.userId ? 'text-primary-900' : 'text-gray-900'">
                     {{ entry.name }}
-                    <span v-if="entry.id === userStore.userId" class="text-sm text-primary-600">(You)</span>
+                    <span v-if="entry.id === userStore.userId" class="text-sm text-primary-600">(Tú)</span>
                   </p>
                   <p class="text-sm text-gray-600">
-                    Rank #{{ entry.rank }}
+                    Posición #{{ entry.rank }}
                   </p>
                 </div>
               </div>
@@ -80,7 +80,7 @@
                   {{ entry.correctAnswers }}
                 </p>
                 <p class="text-sm text-gray-600">
-                  / {{ entry.totalAnswers }} questions
+                  / {{ entry.totalAnswers }} preguntas
                 </p>
                 <p class="text-xs text-gray-500 mt-1">
                   {{ Math.round(entry.score) }}%
@@ -93,7 +93,7 @@
         <!-- Empty state -->
         <div v-if="leaderboard.length === 0" class="text-center py-12">
           <p class="text-xl text-gray-600">
-            No scores yet. Be the first to play!
+            Aún no hay puntajes. ¡Sé el primero en jugar!
           </p>
         </div>
       </div>
@@ -101,15 +101,15 @@
       <!-- Actions -->
       <div class="mt-8 space-y-4">
         <button v-if="!userStore.isAuthenticated" @click="goToRegister" class="btn-primary w-full">
-          Join the Game
+          Unirse al Juego
         </button>
 
         <button @click="refreshLeaderboard" class="btn-secondary w-full" :disabled="loading">
-          {{ loading ? 'Refreshing...' : '🔄 Refresh' }}
+          {{ loading ? 'Actualizando...' : '🔄 Actualizar' }}
         </button>
 
         <button @click="goHome" class="btn-secondary w-full">
-          Back to Home
+          Volver al Inicio
         </button>
       </div>
     </div>
@@ -156,7 +156,7 @@ const loadLeaderboard = async () => {
     const response = await getLeaderboard()
     leaderboard.value = response.data
   } catch (err) {
-    error.value = err.response?.data?.error || 'Failed to load leaderboard.'
+    error.value = err.response?.data?.error || 'No se pudo cargar la tabla de clasificación.'
   } finally {
     loading.value = false
   }

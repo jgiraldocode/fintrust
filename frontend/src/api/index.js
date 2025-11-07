@@ -45,3 +45,9 @@ export const getAdminUsers = (password) =>
 export const resetScores = (password) =>
   api.delete('/admin/reset-scores', getAuthHeaders(password))
 
+export const deleteAllUsers = (password) =>
+  api.delete('/admin/delete-all-users', getAuthHeaders(password))
+
+export const deleteAllQuestions = (password) =>
+  api.delete('/admin/delete-all-questions', getAuthHeaders(password))
+

@@ -3,10 +3,10 @@
     <div class="card w-full max-w-2xl">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-primary-700 mb-2">
-          Welcome, {{ userStore.userName }}! 👋
+          ¡Bienvenido, {{ userStore.userName }}! 👋
         </h2>
         <p class="text-xl text-gray-600">
-          The game will start soon. Please wait...
+          El juego comenzará pronto. Por favor espera...
         </p>
       </div>
 
@@ -18,34 +18,34 @@
       <!-- Educational content about graphs -->
       <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 space-y-6">
         <h3 class="text-2xl font-bold text-gray-800 mb-4">
-          Did You Know? 🤔
+          ¿Sabías que? 🤔
         </h3>
 
         <div class="space-y-4">
           <div class="bg-white rounded-lg p-4 shadow-sm">
             <h4 class="font-bold text-lg text-primary-700 mb-2">
-              What are Knowledge Graphs?
+              ¿Qué son los Grafos de Conocimiento?
             </h4>
             <p class="text-gray-700 text-lg leading-relaxed">
-              Knowledge graphs are visual representations that show how different pieces of information connect to each other. They help us understand relationships between people, places, and things!
+              Los grafos de conocimiento son representaciones visuales que muestran cómo diferentes piezas de información se conectan entre sí. ¡Nos ayudan a entender las relaciones entre personas, lugares y cosas!
             </p>
           </div>
 
           <div class="bg-white rounded-lg p-4 shadow-sm">
             <h4 class="font-bold text-lg text-primary-700 mb-2">
-              Real-World Applications 🌍
+              Aplicaciones en el Mundo Real 🌍
             </h4>
             <p class="text-gray-700 text-lg leading-relaxed">
-              Companies use graphs to detect fraud, recommend products, and understand customer behavior. For example, social networks use graphs to suggest friends you might know based on shared connections!
+              Las empresas usan grafos para detectar fraude, recomendar productos y entender el comportamiento de los clientes. ¡Por ejemplo, las redes sociales usan grafos para sugerir amigos que podrías conocer basándose en conexiones compartidas!
             </p>
           </div>
 
           <div class="bg-white rounded-lg p-4 shadow-sm">
             <h4 class="font-bold text-lg text-primary-700 mb-2">
-              Understanding Connections 🔗
+              Entendiendo las Conexiones 🔗
             </h4>
             <p class="text-gray-700 text-lg leading-relaxed">
-              In identity verification, graphs help connect phones, emails, addresses, and devices to real people. This makes it easier to spot unusual patterns and keep everyone safe!
+              En la verificación de identidad, los grafos ayudan a conectar teléfonos, correos electrónicos, direcciones y dispositivos con personas reales. ¡Esto facilita detectar patrones inusuales y mantener a todos seguros!
             </p>
           </div>
         </div>
@@ -53,7 +53,7 @@
 
       <div class="mt-8 text-center">
         <p class="text-gray-500 text-lg">
-          Checking game status...
+          Verificando estado del juego...
         </p>
       </div>
     </div>
@@ -92,4 +92,3 @@ onUnmounted(() => {
   }
 })
 </script>
-

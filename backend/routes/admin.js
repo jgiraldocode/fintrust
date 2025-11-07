@@ -206,5 +206,57 @@ router.delete('/reset-scores', (req, res) => {
   });
 });
 
+// Delete all users
+router.delete('/delete-all-users', (req, res) => {
+  const db = getDb();
+
+  // First delete all scores associated with users
+  db.run('DELETE FROM scores', (err) => {
+    if (err) {
+      console.error('Error deleting scores:', err);
+      return res.status(500).json({ error: 'Failed to delete user scores' });
+    }
+
+    // Then delete all users
+    db.run('DELETE FROM users', function(err) {
+      if (err) {
+        console.error('Error deleting users:', err);
+        return res.status(500).json({ error: 'Failed to delete users' });
+      }
+
+      res.json({
+        message: 'All users have been deleted',
+        deletedCount: this.changes
+      });
+    });
+  });
+});
+
+// Delete all questions
+router.delete('/delete-all-questions', (req, res) => {
+  const db = getDb();
+
+  // First delete all scores associated with questions
+  db.run('DELETE FROM scores', (err) => {
+    if (err) {
+      console.error('Error deleting scores:', err);
+      return res.status(500).json({ error: 'Failed to delete question scores' });
+    }
+
+    // Then delete all questions
+    db.run('DELETE FROM questions', function(err) {
+      if (err) {
+        console.error('Error deleting questions:', err);
+        return res.status(500).json({ error: 'Failed to delete questions' });
+      }
+
+      res.json({
+        message: 'All questions have been deleted',
+        deletedCount: this.changes
+      });
+    });
+  });
+});
+
 module.exports = router;
 
