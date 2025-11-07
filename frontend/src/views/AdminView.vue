@@ -185,13 +185,60 @@
                 </button>
               </div>
 
-              <div>
+              <!-- Toggle for multiple answers -->
+              <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <label class="flex items-center gap-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    v-model="questionForm.allowMultipleAnswers"
+                    class="w-5 h-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
+                  />
+                  <span class="text-lg font-medium">
+                    ✅ Permitir múltiples respuestas correctas
+                  </span>
+                </label>
+                <p class="text-sm text-gray-600 mt-2 ml-8">
+                  Si activas esta opción, podrás seleccionar múltiples respuestas correctas. Los usuarios recibirán puntaje parcial según sus selecciones.
+                </p>
+              </div>
+
+              <!-- Single answer selection -->
+              <div v-if="!questionForm.allowMultipleAnswers">
                 <label class="block text-lg font-medium mb-2">Respuesta Correcta</label>
                 <select v-model.number="questionForm.correctAnswer" class="input" required>
                   <option v-for="(option, index) in questionForm.options" :key="index" :value="index">
                     Opción {{ index + 1 }}: {{ option || '(vacío)' }}
                   </option>
                 </select>
+              </div>
+
+              <!-- Multiple answers selection -->
+              <div v-else>
+                <label class="block text-lg font-medium mb-2">
+                  Respuestas Correctas (selecciona todas las que apliquen)
+                </label>
+                <div class="space-y-2">
+                  <label
+                    v-for="(option, index) in questionForm.options"
+                    :key="index"
+                    class="flex items-start gap-3 p-3 bg-white border-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                    :class="questionForm.correctAnswers.includes(index) ? 'border-primary-500 bg-primary-50' : 'border-gray-300'"
+                  >
+                    <input
+                      type="checkbox"
+                      :value="index"
+                      v-model="questionForm.correctAnswers"
+                      class="w-5 h-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500 mt-0.5"
+                    />
+                    <div class="flex-1">
+                      <span class="font-medium">Opción {{ index + 1 }}:</span>
+                      <span class="ml-2">{{ option || '(vacío)' }}</span>
+                    </div>
+                  </label>
+                </div>
+                <p v-if="questionForm.correctAnswers.length === 0" class="text-sm text-red-600 mt-2">
+                  ⚠️ Debes seleccionar al menos una respuesta correcta
+                </p>
               </div>
 
               <div>
@@ -369,6 +416,8 @@ const questionForm = ref({
   graphJson: '',
   options: ['', ''],
   correctAnswer: 0,
+  correctAnswers: [],
+  allowMultipleAnswers: false,
   tip: ''
 })
 
@@ -437,13 +486,28 @@ const saveQuestion = async () => {
   loading.value = true
   error.value = ''
 
+  // Validate multiple answers
+  if (questionForm.value.allowMultipleAnswers && questionForm.value.correctAnswers.length === 0) {
+    error.value = 'Debes seleccionar al menos una respuesta correcta'
+    alert(error.value)
+    loading.value = false
+    return
+  }
+
   try {
     const data = {
       questionText: questionForm.value.questionText,
       graphJson: questionForm.value.graphJson,
       options: questionForm.value.options,
-      correctAnswer: questionForm.value.correctAnswer,
+      allowMultipleAnswers: questionForm.value.allowMultipleAnswers,
       tip: questionForm.value.tip
+    }
+
+    // Add correct answer(s) based on type
+    if (questionForm.value.allowMultipleAnswers) {
+      data.correctAnswers = questionForm.value.correctAnswers
+    } else {
+      data.correctAnswer = questionForm.value.correctAnswer
     }
 
     if (editingQuestion.value) {
@@ -468,7 +532,9 @@ const editQuestion = (question) => {
     questionText: question.questionText,
     graphJson: question.graphJson,
     options: [...question.options],
-    correctAnswer: question.correctAnswer,
+    correctAnswer: question.correctAnswer || 0,
+    correctAnswers: question.correctAnswers || [],
+    allowMultipleAnswers: question.allowMultipleAnswers || false,
     tip: question.tip || ''
   }
   showCreateForm.value = false
@@ -493,6 +559,8 @@ const cancelEdit = () => {
     graphJson: '',
     options: ['', ''],
     correctAnswer: 0,
+    correctAnswers: [],
+    allowMultipleAnswers: false,
     tip: ''
   }
 }

@@ -49,8 +49,9 @@ router.get('/questions', (req, res) => {
         graphData: JSON.parse(row.graph_json),
         questionText: row.question_text,
         options: JSON.parse(row.options_json),
+        allowMultipleAnswers: row.allow_multiple_answers === 1,
         tip: row.tip
-        // Note: correct_answer is not included in the response for security
+        // Note: correct_answer and correct_answers_json are not included for security
       }));
 
       res.json(questions);
@@ -94,9 +95,9 @@ router.post('/answer', (req, res) => {
           return res.status(400).json({ error: 'Question already answered' });
         }
 
-        // Get the correct answer
+        // Get the correct answer(s)
         db.get(
-          'SELECT correct_answer, tip FROM questions WHERE id = ?',
+          'SELECT correct_answer, correct_answers_json, allow_multiple_answers, tip, options_json FROM questions WHERE id = ?',
           [questionId],
           (err, question) => {
             if (err) {
@@ -108,12 +109,45 @@ router.post('/answer', (req, res) => {
               return res.status(404).json({ error: 'Question not found' });
             }
 
-            const isCorrect = answer === question.correct_answer;
+            const isMultipleAnswers = question.allow_multiple_answers === 1;
+            let score = 0;
+            let isCorrect = false;
+            let correctAnswerResponse;
 
-            // Save the score
+            if (isMultipleAnswers) {
+              // Handle multiple answers with partial credit scoring
+              const correctAnswers = JSON.parse(question.correct_answers_json);
+              const userAnswers = Array.isArray(answer) ? answer : [answer];
+              const options = JSON.parse(question.options_json);
+              const totalOptions = options.length;
+
+              // Calculate correct selections
+              const correctSelections = userAnswers.filter(a => correctAnswers.includes(a)).length;
+
+              // Calculate incorrect selections
+              const incorrectSelections = userAnswers.filter(a => !correctAnswers.includes(a)).length;
+
+              // Scoring formula: (correct / total_correct) - (incorrect / total_options)
+              const correctScore = correctSelections / correctAnswers.length;
+              const incorrectPenalty = incorrectSelections / totalOptions;
+              score = Math.max(0, Math.min(1, correctScore - incorrectPenalty));
+
+              // Consider question correct if score >= 0.7 or all correct answers selected with no incorrect
+              isCorrect = (correctSelections === correctAnswers.length && incorrectSelections === 0) || score >= 0.7;
+              correctAnswerResponse = correctAnswers;
+            } else {
+              // Handle single answer (existing logic)
+              isCorrect = answer === question.correct_answer;
+              score = isCorrect ? 1 : 0;
+              correctAnswerResponse = question.correct_answer;
+            }
+
+            // Save the score (store as integer for backward compatibility, multiply by 100 for precision)
+            const scoreValue = Math.round(score * 100);
+
             db.run(
               'INSERT INTO scores (id, user_id, question_id, is_correct) VALUES (?, ?, ?, ?)',
-              [scoreId, userId, questionId, isCorrect ? 1 : 0],
+              [scoreId, userId, questionId, scoreValue],
               function(err) {
                 if (err) {
                   console.error('Error saving score:', err);
@@ -122,7 +156,8 @@ router.post('/answer', (req, res) => {
 
                 res.json({
                   isCorrect,
-                  correctAnswer: question.correct_answer,
+                  score: score,
+                  correctAnswer: correctAnswerResponse,
                   tip: question.tip || ''
                 });
               }

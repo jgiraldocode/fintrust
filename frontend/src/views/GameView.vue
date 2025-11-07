@@ -56,8 +56,18 @@
             @click="selectOption(index)"
             :disabled="answered"
             :class="[
-              'w-full p-3 md:p-4 text-left rounded-lg border-2 transition-all text-base md:text-lg font-medium',
-              answered && index === selectedAnswer && answerResult?.isCorrect
+              'w-full p-3 md:p-4 text-left rounded-lg border-2 transition-all text-base md:text-lg font-medium flex items-start gap-3',
+              // Multiple answer logic
+              currentQuestion.allowMultipleAnswers && answered && Array.isArray(answerResult?.correctAnswer) && answerResult.correctAnswer.includes(index) && selectedAnswers.includes(index)
+                ? 'bg-green-100 border-green-500 text-green-800'
+                : currentQuestion.allowMultipleAnswers && answered && selectedAnswers.includes(index) && !answerResult?.correctAnswer.includes(index)
+                ? 'bg-red-100 border-red-500 text-red-800'
+                : currentQuestion.allowMultipleAnswers && answered && answerResult?.correctAnswer.includes(index)
+                ? 'bg-green-50 border-green-400 text-green-700'
+                : currentQuestion.allowMultipleAnswers && selectedAnswers.includes(index) && !answered
+                ? 'bg-primary-100 border-primary-500 text-primary-900'
+                // Single answer logic
+                : answered && index === selectedAnswer && answerResult?.isCorrect
                 ? 'bg-green-100 border-green-500 text-green-800'
                 : answered && index === selectedAnswer && !answerResult?.isCorrect
                 ? 'bg-red-100 border-red-500 text-red-800'
@@ -68,8 +78,16 @@
                 : 'bg-white border-gray-300 hover:border-primary-500 hover:bg-primary-50 active:bg-primary-100'
             ]"
           >
-            <span class="font-bold mr-2">{{ String.fromCharCode(65 + index) }}.</span>
-            {{ option }}
+            <span v-if="currentQuestion.allowMultipleAnswers" class="flex-shrink-0 mt-0.5">
+              <span class="inline-flex items-center justify-center w-5 h-5 border-2 rounded"
+                    :class="selectedAnswers.includes(index) ? 'bg-primary-600 border-primary-600' : 'border-gray-400'">
+                <span v-if="selectedAnswers.includes(index)" class="text-white text-sm">✓</span>
+              </span>
+            </span>
+            <div class="flex-1">
+              <span class="font-bold mr-2">{{ String.fromCharCode(65 + index) }}.</span>
+              {{ option }}
+            </div>
           </button>
         </div>
 
@@ -78,9 +96,9 @@
           v-if="!answered"
           @click="submitSelectedAnswer"
           class="btn-primary w-full mt-4 py-3 text-lg font-bold"
-          :class="selectedAnswer === null ? 'opacity-60' : ''"
+          :class="(selectedAnswer === null && selectedAnswers.length === 0) ? 'opacity-60' : ''"
         >
-          📤 Enviar Respuesta
+          📤 Enviar {{ currentQuestion.allowMultipleAnswers ? 'Respuestas' : 'Respuesta' }}
         </button>
 
         <!-- Answer feedback - Compacto en móvil -->
@@ -90,6 +108,10 @@
             <div class="flex-1">
               <p class="text-lg md:text-xl font-bold mb-1 md:mb-2" :class="answerResult.isCorrect ? 'text-green-800' : 'text-red-800'">
                 {{ answerResult.isCorrect ? '¡Correcto!' : '¡Incorrecto!' }}
+              </p>
+              <p v-if="currentQuestion.allowMultipleAnswers && answerResult.score !== undefined" class="text-sm md:text-base text-gray-700 mb-2">
+                <span class="font-semibold">🎯 Puntaje:</span> {{ Math.round(answerResult.score * 100) }}%
+                <span class="text-xs ml-2">({{ answerResult.score.toFixed(2) }} puntos)</span>
               </p>
               <p v-if="answerResult.tip" class="text-sm md:text-lg text-gray-700">
                 <span class="font-semibold">💡 Consejo:</span> {{ answerResult.tip }}
@@ -122,7 +144,8 @@ const gameStore = useGameStore()
 const loading = ref(true)
 const error = ref('')
 const answered = ref(false)
-const selectedAnswer = ref(null)
+const selectedAnswer = ref(null) // Single answer: number | null
+const selectedAnswers = ref([]) // Multiple answers: number[]
 const answerResult = ref(null)
 const correctAnswers = ref(0)
 const showTutorial = ref(true)
@@ -169,25 +192,49 @@ onMounted(async () => {
 
 const selectOption = (index) => {
   if (answered.value) return
-  selectedAnswer.value = index
+
+  // Check if this is a multiple answer question
+  if (currentQuestion.value.allowMultipleAnswers) {
+    // Toggle selection for multiple answers
+    const idx = selectedAnswers.value.indexOf(index)
+    if (idx > -1) {
+      selectedAnswers.value.splice(idx, 1)
+    } else {
+      selectedAnswers.value.push(index)
+    }
+  } else {
+    // Single answer selection
+    selectedAnswer.value = index
+  }
 }
 
 const submitSelectedAnswer = async () => {
   if (answered.value) return
 
   // Validar que haya seleccionado una opción
-  if (selectedAnswer.value === null) {
-    alert('⚠️ Por favor selecciona una respuesta antes de enviar.')
-    return
+  const isMultiple = currentQuestion.value.allowMultipleAnswers
+
+  if (isMultiple) {
+    if (selectedAnswers.value.length === 0) {
+      alert('⚠️ Por favor selecciona al menos una respuesta antes de enviar.')
+      return
+    }
+  } else {
+    if (selectedAnswer.value === null) {
+      alert('⚠️ Por favor selecciona una respuesta antes de enviar.')
+      return
+    }
   }
 
   answered.value = true
 
   try {
+    const answerToSend = isMultiple ? selectedAnswers.value : selectedAnswer.value
+
     const response = await submitAnswer(
       userStore.userId,
       currentQuestion.value.id,
-      selectedAnswer.value
+      answerToSend
     )
 
     answerResult.value = response.data
@@ -198,7 +245,7 @@ const submitSelectedAnswer = async () => {
 
     gameStore.addAnswer({
       questionId: currentQuestion.value.id,
-      selectedAnswer: selectedAnswer.value,
+      selectedAnswer: answerToSend,
       isCorrect: response.data.isCorrect
     })
   } catch (err) {
@@ -214,6 +261,7 @@ const nextQuestion = () => {
     // Reset for next question
     answered.value = false
     selectedAnswer.value = null
+    selectedAnswers.value = []
     answerResult.value = null
   } else {
     // Game finished, go to results

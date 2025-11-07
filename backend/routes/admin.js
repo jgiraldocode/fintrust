@@ -46,6 +46,8 @@ router.get('/questions', (req, res) => {
       questionText: row.question_text,
       options: JSON.parse(row.options_json),
       correctAnswer: row.correct_answer,
+      correctAnswers: row.correct_answers_json ? JSON.parse(row.correct_answers_json) : [],
+      allowMultipleAnswers: row.allow_multiple_answers === 1,
       tip: row.tip,
       createdAt: row.created_at
     }));
@@ -56,10 +58,10 @@ router.get('/questions', (req, res) => {
 
 // Create new question
 router.post('/questions', (req, res) => {
-  const { graphJson, questionText, options, correctAnswer, tip } = req.body;
+  const { graphJson, questionText, options, correctAnswer, correctAnswers, allowMultipleAnswers, tip } = req.body;
 
   // Validation
-  if (!graphJson || !questionText || !options || correctAnswer === undefined) {
+  if (!graphJson || !questionText || !options) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -75,17 +77,41 @@ router.post('/questions', (req, res) => {
     return res.status(400).json({ error: 'Options must be an array with at least 2 items' });
   }
 
-  // Validate correct answer index
-  if (correctAnswer < 0 || correctAnswer >= options.length) {
-    return res.status(400).json({ error: 'Invalid correct answer index' });
+  // Handle multiple answers vs single answer
+  const isMultipleAnswers = allowMultipleAnswers === true;
+  let singleAnswer = null;
+  let correctAnswersJson = null;
+
+  if (isMultipleAnswers) {
+    // Validate correct answers array
+    if (!Array.isArray(correctAnswers) || correctAnswers.length === 0) {
+      return res.status(400).json({ error: 'Multiple answer questions require at least one correct answer' });
+    }
+    // Validate each index
+    for (const idx of correctAnswers) {
+      if (idx < 0 || idx >= options.length) {
+        return res.status(400).json({ error: 'Invalid correct answer index' });
+      }
+    }
+    correctAnswersJson = JSON.stringify(correctAnswers);
+    singleAnswer = correctAnswers[0]; // Store first one for backward compatibility
+  } else {
+    // Single answer validation
+    if (correctAnswer === undefined) {
+      return res.status(400).json({ error: 'Single answer questions require correctAnswer' });
+    }
+    if (correctAnswer < 0 || correctAnswer >= options.length) {
+      return res.status(400).json({ error: 'Invalid correct answer index' });
+    }
+    singleAnswer = correctAnswer;
   }
 
   const questionId = uuidv4();
   const db = getDb();
 
   db.run(
-    'INSERT INTO questions (id, graph_json, question_text, options_json, correct_answer, tip) VALUES (?, ?, ?, ?, ?, ?)',
-    [questionId, graphJson, questionText, JSON.stringify(options), correctAnswer, tip || ''],
+    'INSERT INTO questions (id, graph_json, question_text, options_json, correct_answer, correct_answers_json, allow_multiple_answers, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+    [questionId, graphJson, questionText, JSON.stringify(options), singleAnswer, correctAnswersJson, isMultipleAnswers ? 1 : 0, tip || ''],
     function(err) {
       if (err) {
         console.error('Error creating question:', err);
@@ -103,10 +129,10 @@ router.post('/questions', (req, res) => {
 // Update question
 router.put('/questions/:id', (req, res) => {
   const { id } = req.params;
-  const { graphJson, questionText, options, correctAnswer, tip } = req.body;
+  const { graphJson, questionText, options, correctAnswer, correctAnswers, allowMultipleAnswers, tip } = req.body;
 
   // Validation
-  if (!graphJson || !questionText || !options || correctAnswer === undefined) {
+  if (!graphJson || !questionText || !options) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
@@ -122,16 +148,40 @@ router.put('/questions/:id', (req, res) => {
     return res.status(400).json({ error: 'Options must be an array with at least 2 items' });
   }
 
-  // Validate correct answer index
-  if (correctAnswer < 0 || correctAnswer >= options.length) {
-    return res.status(400).json({ error: 'Invalid correct answer index' });
+  // Handle multiple answers vs single answer
+  const isMultipleAnswers = allowMultipleAnswers === true;
+  let singleAnswer = null;
+  let correctAnswersJson = null;
+
+  if (isMultipleAnswers) {
+    // Validate correct answers array
+    if (!Array.isArray(correctAnswers) || correctAnswers.length === 0) {
+      return res.status(400).json({ error: 'Multiple answer questions require at least one correct answer' });
+    }
+    // Validate each index
+    for (const idx of correctAnswers) {
+      if (idx < 0 || idx >= options.length) {
+        return res.status(400).json({ error: 'Invalid correct answer index' });
+      }
+    }
+    correctAnswersJson = JSON.stringify(correctAnswers);
+    singleAnswer = correctAnswers[0]; // Store first one for backward compatibility
+  } else {
+    // Single answer validation
+    if (correctAnswer === undefined) {
+      return res.status(400).json({ error: 'Single answer questions require correctAnswer' });
+    }
+    if (correctAnswer < 0 || correctAnswer >= options.length) {
+      return res.status(400).json({ error: 'Invalid correct answer index' });
+    }
+    singleAnswer = correctAnswer;
   }
 
   const db = getDb();
 
   db.run(
-    'UPDATE questions SET graph_json = ?, question_text = ?, options_json = ?, correct_answer = ?, tip = ? WHERE id = ?',
-    [graphJson, questionText, JSON.stringify(options), correctAnswer, tip || '', id],
+    'UPDATE questions SET graph_json = ?, question_text = ?, options_json = ?, correct_answer = ?, correct_answers_json = ?, allow_multiple_answers = ?, tip = ? WHERE id = ?',
+    [graphJson, questionText, JSON.stringify(options), singleAnswer, correctAnswersJson, isMultipleAnswers ? 1 : 0, tip || '', id],
     function(err) {
       if (err) {
         console.error('Error updating question:', err);
