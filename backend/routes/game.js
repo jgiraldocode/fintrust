@@ -173,13 +173,17 @@ router.post('/answer', (req, res) => {
 router.get('/leaderboard', (req, res) => {
   const db = getDb();
 
+  // Note: All scores are stored as 0-100 (both single and multiple answer questions)
+  // - correct_answers: sum of fractional scores (is_correct / 100)
+  //   Example: 100 + 75 + 50 = 225, divided by 100 = 2.25 correct answers
+  // - score: average of all scores (already in 0-100 scale)
   const query = `
     SELECT
       u.id,
       u.name,
       COUNT(s.id) as total_answers,
-      SUM(s.is_correct) as correct_answers,
-      CAST(SUM(s.is_correct) AS FLOAT) * 100.0 / NULLIF(COUNT(s.id), 0) as score,
+      COALESCE(SUM(CAST(s.is_correct AS FLOAT) / 100.0), 0) as correct_answers,
+      COALESCE(AVG(s.is_correct), 0) as score,
       MAX(s.answered_at) as finish_time
     FROM users u
     LEFT JOIN scores s ON u.id = s.user_id
@@ -212,10 +216,13 @@ router.get('/user-score/:userId', (req, res) => {
   const { userId } = req.params;
   const db = getDb();
 
+  // Note: All scores are stored as 0-100 (both single and multiple answer questions)
+  // Sum fractional scores: each question is worth 1 point, partial credit is summed
+  // Example: scores [100, 75, 50] → correct_answers = 1.0 + 0.75 + 0.5 = 2.25
   const query = `
     SELECT
       COUNT(s.id) as total_answers,
-      SUM(s.is_correct) as correct_answers
+      COALESCE(SUM(CAST(s.is_correct AS FLOAT) / 100.0), 0) as correct_answers
     FROM scores s
     WHERE s.user_id = ?
   `;
