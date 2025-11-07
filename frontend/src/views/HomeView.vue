@@ -109,7 +109,7 @@ const goToRegister = () => {
   if (userStore.isAuthenticated) {
     router.push('/waiting')
   } else {
-    router.push('/register')
+    router.push('/qr')
   }
 }
 

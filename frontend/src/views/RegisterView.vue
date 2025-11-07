@@ -7,33 +7,9 @@
     </div>
 
     <div class="relative z-10 container mx-auto px-4 py-8 min-h-screen flex items-center justify-center">
-      <div class="w-full max-w-5xl">
-        <!-- Desktop: Side-by-side layout, Mobile: Stacked -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <!-- QR Code Section -->
-          <div class="order-2 md:order-1 animate-slide-in-from-left">
-            <div class="glass rounded-2xl p-8 text-center">
-              <h2 class="text-2xl font-bold mb-4 gradient-text">
-                Escanea para Unirte
-              </h2>
-              <p class="text-gray-700 mb-6">
-                Usa la cámara de tu celular para escanear este código QR
-              </p>
-
-              <div class="bg-white p-6 rounded-xl inline-block shadow-lg animate-pulse-glow">
-                <canvas ref="qrcodeCanvas" class="mx-auto"></canvas>
-              </div>
-
-              <div class="mt-6 flex items-center gap-2 justify-center text-sm text-gray-600">
-                <span>📱</span>
-                <span>Registro rápido mediante código QR</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Registration Form -->
-          <div class="order-1 md:order-2 animate-slide-in-from-right">
-            <div class="glass rounded-2xl p-8 shadow-2xl">
+      <div class="w-full max-w-md">
+        <!-- Registration Form -->
+        <div class="glass rounded-2xl p-8 shadow-2xl animate-zoom-in">
               <div class="mb-8">
                 <h2 class="text-3xl font-bold mb-2">
                   <span class="gradient-text">¡Bienvenido! 👋</span>
@@ -93,19 +69,17 @@
                 </button>
               </div>
 
-              <!-- Info Cards -->
-              <div class="mt-8 grid grid-cols-2 gap-4">
-                <div class="bg-primary-50 rounded-lg p-4 text-center">
-                  <div class="text-2xl mb-1">⚡</div>
-                  <div class="text-sm font-medium text-gray-700">Rápido</div>
-                  <div class="text-xs text-gray-600">Configuración rápida</div>
-                </div>
-                <div class="bg-purple-50 rounded-lg p-4 text-center">
-                  <div class="text-2xl mb-1">🎮</div>
-                  <div class="text-sm font-medium text-gray-700">Divertido</div>
-                  <div class="text-xs text-gray-600">Interactivo</div>
-                </div>
-              </div>
+          <!-- Info Cards -->
+          <div class="mt-8 grid grid-cols-2 gap-4">
+            <div class="bg-primary-50 rounded-lg p-4 text-center">
+              <div class="text-2xl mb-1">⚡</div>
+              <div class="text-sm font-medium text-gray-700">Rápido</div>
+              <div class="text-xs text-gray-600">Configuración rápida</div>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-4 text-center">
+              <div class="text-2xl mb-1">🎮</div>
+              <div class="text-sm font-medium text-gray-700">Divertido</div>
+              <div class="text-xs text-gray-600">Interactivo</div>
             </div>
           </div>
         </div>
@@ -115,11 +89,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { registerUser } from '@/api'
-import QRCode from 'qrcode'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -127,24 +100,6 @@ const userStore = useUserStore()
 const name = ref('')
 const loading = ref(false)
 const error = ref('')
-const qrcodeCanvas = ref(null)
-
-onMounted(async () => {
-  // Generate QR code with the registration URL
-  const registrationUrl = window.location.origin + '/register'
-  try {
-    await QRCode.toCanvas(qrcodeCanvas.value, registrationUrl, {
-      width: 220,
-      margin: 2,
-      color: {
-        dark: '#0369a1',
-        light: '#ffffff'
-      }
-    })
-  } catch (err) {
-    console.error('Error generating QR code:', err)
-  }
-})
 
 const handleRegister = async () => {
   if (!name.value.trim()) return

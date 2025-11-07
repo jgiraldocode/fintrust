@@ -19,19 +19,25 @@ router.get('/game-state', (req, res) => {
 
 // Get all questions for gameplay
 router.get('/questions', (req, res) => {
+  const { userId } = req.query;
   const db = getDb();
 
-  // Check if game is active
-  db.get('SELECT is_active FROM game_state WHERE id = 1', (err, gameState) => {
+  // Validate user exists
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  db.get('SELECT id FROM users WHERE id = ?', [userId], (err, user) => {
     if (err) {
-      console.error('Error fetching game state:', err);
-      return res.status(500).json({ error: 'Failed to fetch game state' });
+      console.error('Error checking user:', err);
+      return res.status(500).json({ error: 'Failed to verify user' });
     }
 
-    if (!gameState || !gameState.is_active) {
-      return res.status(403).json({ error: 'Game is not active yet' });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found. Please register first.' });
     }
 
+    // Get questions (game status check removed - handled by WaitingView)
     db.all('SELECT * FROM questions ORDER BY created_at', (err, rows) => {
       if (err) {
         console.error('Error fetching questions:', err);
@@ -63,57 +69,69 @@ router.post('/answer', (req, res) => {
   const db = getDb();
   const scoreId = uuidv4();
 
-  // Check if user already answered this question
-  db.get(
-    'SELECT * FROM scores WHERE user_id = ? AND question_id = ?',
-    [userId, questionId],
-    (err, existingScore) => {
-      if (err) {
-        console.error('Error checking existing score:', err);
-        return res.status(500).json({ error: 'Failed to check score' });
-      }
-
-      if (existingScore) {
-        return res.status(400).json({ error: 'Question already answered' });
-      }
-
-      // Get the correct answer
-      db.get(
-        'SELECT correct_answer, tip FROM questions WHERE id = ?',
-        [questionId],
-        (err, question) => {
-          if (err) {
-            console.error('Error fetching question:', err);
-            return res.status(500).json({ error: 'Failed to fetch question' });
-          }
-
-          if (!question) {
-            return res.status(404).json({ error: 'Question not found' });
-          }
-
-          const isCorrect = answer === question.correct_answer;
-
-          // Save the score
-          db.run(
-            'INSERT INTO scores (id, user_id, question_id, is_correct) VALUES (?, ?, ?, ?)',
-            [scoreId, userId, questionId, isCorrect ? 1 : 0],
-            function(err) {
-              if (err) {
-                console.error('Error saving score:', err);
-                return res.status(500).json({ error: 'Failed to save score' });
-              }
-
-              res.json({
-                isCorrect,
-                correctAnswer: question.correct_answer,
-                tip: question.tip || ''
-              });
-            }
-          );
-        }
-      );
+  // Verify user exists
+  db.get('SELECT id FROM users WHERE id = ?', [userId], (err, user) => {
+    if (err) {
+      console.error('Error checking user:', err);
+      return res.status(500).json({ error: 'Failed to verify user' });
     }
-  );
+
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if user already answered this question
+    db.get(
+      'SELECT * FROM scores WHERE user_id = ? AND question_id = ?',
+      [userId, questionId],
+      (err, existingScore) => {
+        if (err) {
+          console.error('Error checking existing score:', err);
+          return res.status(500).json({ error: 'Failed to check score' });
+        }
+
+        if (existingScore) {
+          return res.status(400).json({ error: 'Question already answered' });
+        }
+
+        // Get the correct answer
+        db.get(
+          'SELECT correct_answer, tip FROM questions WHERE id = ?',
+          [questionId],
+          (err, question) => {
+            if (err) {
+              console.error('Error fetching question:', err);
+              return res.status(500).json({ error: 'Failed to fetch question' });
+            }
+
+            if (!question) {
+              return res.status(404).json({ error: 'Question not found' });
+            }
+
+            const isCorrect = answer === question.correct_answer;
+
+            // Save the score
+            db.run(
+              'INSERT INTO scores (id, user_id, question_id, is_correct) VALUES (?, ?, ?, ?)',
+              [scoreId, userId, questionId, isCorrect ? 1 : 0],
+              function(err) {
+                if (err) {
+                  console.error('Error saving score:', err);
+                  return res.status(500).json({ error: 'Failed to save score' });
+                }
+
+                res.json({
+                  isCorrect,
+                  correctAnswer: question.correct_answer,
+                  tip: question.tip || ''
+                });
+              }
+            );
+          }
+        );
+      }
+    );
+  });
 });
 
 // Get leaderboard
@@ -126,11 +144,12 @@ router.get('/leaderboard', (req, res) => {
       u.name,
       COUNT(s.id) as total_answers,
       SUM(s.is_correct) as correct_answers,
-      CAST(SUM(s.is_correct) AS FLOAT) * 100.0 / NULLIF(COUNT(s.id), 0) as score
+      CAST(SUM(s.is_correct) AS FLOAT) * 100.0 / NULLIF(COUNT(s.id), 0) as score,
+      MAX(s.answered_at) as finish_time
     FROM users u
     LEFT JOIN scores s ON u.id = s.user_id
     GROUP BY u.id, u.name
-    ORDER BY correct_answers DESC, total_answers ASC
+    ORDER BY score DESC, finish_time ASC
   `;
 
   db.all(query, (err, rows) => {
@@ -145,7 +164,8 @@ router.get('/leaderboard', (req, res) => {
       name: row.name,
       totalAnswers: row.total_answers || 0,
       correctAnswers: row.correct_answers || 0,
-      score: row.score || 0
+      score: row.score || 0,
+      finishTime: row.finish_time
     }));
 
     res.json(leaderboard);

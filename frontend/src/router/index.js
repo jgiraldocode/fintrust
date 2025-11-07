@@ -10,6 +10,11 @@ const router = createRouter({
       component: () => import('@/views/HomeView.vue')
     },
     {
+      path: '/qr',
+      name: 'qr',
+      component: () => import('@/views/QRView.vue')
+    },
+    {
       path: '/register',
       name: 'register',
       component: () => import('@/views/RegisterView.vue')

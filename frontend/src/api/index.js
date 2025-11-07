@@ -11,7 +11,7 @@ export const getUser = (id) => api.get(`/user/${id}`)
 
 // Game endpoints
 export const getGameState = () => api.get('/game-state')
-export const getQuestions = () => api.get('/questions')
+export const getQuestions = (userId) => api.get('/questions', { params: { userId } })
 export const submitAnswer = (userId, questionId, answer) =>
   api.post('/answer', { userId, questionId, answer })
 export const getLeaderboard = () => api.get('/leaderboard')

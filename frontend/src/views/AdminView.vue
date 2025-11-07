@@ -38,8 +38,44 @@
 
       <!-- Admin Dashboard -->
       <div v-else class="space-y-6">
-        <!-- Game Controls -->
+        <!-- Tabs Navigation -->
         <div class="card">
+          <div class="flex flex-wrap gap-2">
+            <button
+              @click="activeTab = 'general'"
+              class="px-4 py-2 rounded-lg font-medium transition-all"
+              :class="activeTab === 'general' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+            >
+              📊 General
+            </button>
+            <button
+              @click="activeTab = 'questions'"
+              class="px-4 py-2 rounded-lg font-medium transition-all"
+              :class="activeTab === 'questions' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+            >
+              📝 Preguntas
+            </button>
+            <button
+              @click="activeTab = 'users'"
+              class="px-4 py-2 rounded-lg font-medium transition-all"
+              :class="activeTab === 'users' ? 'bg-primary-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+            >
+              👥 Usuarios
+            </button>
+            <button
+              @click="activeTab = 'danger'"
+              class="px-4 py-2 rounded-lg font-medium transition-all"
+              :class="activeTab === 'danger' ? 'bg-red-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+            >
+              ⚠️ Eliminación
+            </button>
+          </div>
+        </div>
+
+        <!-- Tab 1: General -->
+        <div v-if="activeTab === 'general'" class="space-y-6">
+          <!-- Game Controls -->
+          <div class="card">
           <h2 class="text-2xl font-bold mb-4">Control del Juego</h2>
           <div class="flex items-center gap-4">
             <button
@@ -67,26 +103,27 @@
           </p>
         </div>
 
-        <!-- Stats -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="card bg-blue-50">
-            <p class="text-gray-600 mb-2">Total de Preguntas</p>
-            <p class="text-4xl font-bold text-blue-600">{{ questions.length }}</p>
-          </div>
-          <div class="card bg-green-50">
-            <p class="text-gray-600 mb-2">Total de Usuarios</p>
-            <p class="text-4xl font-bold text-green-600">{{ users.length }}</p>
-          </div>
-          <div class="card bg-purple-50">
-            <p class="text-gray-600 mb-2">Estado del Juego</p>
-            <p class="text-2xl font-bold text-purple-600">
-              {{ gameState.isActive ? 'En Curso' : 'Detenido' }}
-            </p>
+          <!-- Stats -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="card bg-blue-50">
+              <p class="text-gray-600 mb-2">Total de Preguntas</p>
+              <p class="text-4xl font-bold text-blue-600">{{ questions.length }}</p>
+            </div>
+            <div class="card bg-green-50">
+              <p class="text-gray-600 mb-2">Total de Usuarios</p>
+              <p class="text-4xl font-bold text-green-600">{{ users.length }}</p>
+            </div>
+            <div class="card bg-purple-50">
+              <p class="text-gray-600 mb-2">Estado del Juego</p>
+              <p class="text-2xl font-bold text-purple-600">
+                {{ gameState.isActive ? 'En Curso' : 'Detenido' }}
+              </p>
+            </div>
           </div>
         </div>
 
-        <!-- Questions Management -->
-        <div class="card">
+        <!-- Tab 2: Questions Management -->
+        <div v-if="activeTab === 'questions'" class="card">
           <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-bold">Preguntas</h2>
             <button @click="showCreateForm = !showCreateForm" class="btn-primary">
@@ -186,9 +223,14 @@
                   ✕
                 </button>
               </div>
-              <NetworkGraph v-if="previewGraphData" :graph-data="previewGraphData" />
-              <div v-else class="text-red-600 p-4">
-                Formato JSON del grafo inválido
+              <NetworkGraph
+                v-if="previewGraphData && previewGraphData.nodes && previewGraphData.links"
+                :key="JSON.stringify(previewGraphData)"
+                :graph-data="previewGraphData"
+              />
+              <div v-else class="text-red-600 p-4 text-center">
+                <p class="text-lg font-semibold mb-2">Formato JSON del grafo inválido</p>
+                <p class="text-sm">Asegúrate de que el JSON tenga la estructura correcta con "nodes" y "links".</p>
               </div>
             </div>
           </div>
@@ -226,8 +268,8 @@
           </div>
         </div>
 
-        <!-- Users List -->
-        <div class="card">
+        <!-- Tab 3: Users List -->
+        <div v-if="activeTab === 'users'" class="card">
           <h2 class="text-2xl font-bold mb-4">Usuarios Registrados</h2>
           <div class="overflow-x-auto">
             <table class="w-full">
@@ -250,8 +292,8 @@
           </div>
         </div>
 
-        <!-- Danger Zone -->
-        <div class="card bg-red-50 border-2 border-red-300">
+        <!-- Tab 4: Danger Zone -->
+        <div v-if="activeTab === 'danger'" class="card bg-red-50 border-2 border-red-300">
           <h2 class="text-2xl font-bold text-red-700 mb-4">⚠️ Zona de Peligro</h2>
 
           <div class="space-y-4">
@@ -311,6 +353,7 @@ const isAuthenticated = ref(false)
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
+const activeTab = ref('general')
 
 const gameState = ref({ isActive: false })
 const questions = ref([])
