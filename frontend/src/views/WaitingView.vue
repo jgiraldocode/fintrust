@@ -65,6 +65,7 @@ import { onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 import { useGameStore } from '@/stores/game'
+import { getGameState } from '@/api'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -73,10 +74,35 @@ const gameStore = useGameStore()
 let checkInterval = null
 
 onMounted(() => {
+  // Verify user is authenticated
+  if (!userStore.userId) {
+    console.log('Usuario no autenticado en waiting, redirigiendo a registro...')
+    userStore.clearUser() // Clear any stale data
+    router.push('/register')
+    return
+  }
+
   // Redirect to game if it's already active
   if (gameStore.isGameActive) {
     router.push('/game')
+    return
   }
+
+  // Check game state periodically (only in waiting view)
+  const checkGameState = async () => {
+    try {
+      const response = await getGameState()
+      gameStore.setGameActive(response.data.isActive)
+    } catch (error) {
+      console.error('Error checking game state:', error)
+    }
+  }
+
+  // Initial check
+  checkGameState()
+
+  // Check every 5 seconds
+  checkInterval = setInterval(checkGameState, 5000)
 })
 
 // Watch for game state changes

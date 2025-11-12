@@ -611,7 +611,23 @@ const deleteAllQuestionsConfirm = async () => {
 }
 
 const formatDate = (dateString) => {
-  return new Date(dateString).toLocaleString()
+  if (!dateString) return ''
+
+  // SQLite returns dates without timezone info, treat them as UTC
+  // If the date doesn't end with 'Z', add it to indicate UTC
+  const utcDateString = dateString.endsWith('Z') ? dateString : dateString + 'Z'
+  const date = new Date(utcDateString)
+
+  // Format in Bogotá timezone
+  return date.toLocaleString('es-CO', {
+    timeZone: 'America/Bogota',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
 }
 
 const goHome = () => {

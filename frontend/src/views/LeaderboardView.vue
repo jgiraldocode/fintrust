@@ -85,6 +85,9 @@
                 <p class="text-xs text-gray-500 mt-1">
                   {{ Math.round(entry.score) }}%
                 </p>
+                <p v-if="entry.finishTime" class="text-xs text-gray-400 mt-1">
+                  {{ formatDate(entry.finishTime) }}
+                </p>
               </div>
             </div>
           </div>
@@ -146,6 +149,47 @@ const getRankIcon = (rank) => {
   if (rank === 2) return '🥈'
   if (rank === 3) return '🥉'
   return `#${rank}`
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return ''
+
+  // SQLite returns dates without timezone info, treat them as UTC
+  // If the date doesn't end with 'Z', add it to indicate UTC
+  const utcDateString = dateString.endsWith('Z') ? dateString : dateString + 'Z'
+  const date = new Date(utcDateString)
+  const now = new Date()
+
+  // Calculate difference using UTC timestamps (always accurate)
+  const diffMs = now - date
+  const diffMins = Math.floor(diffMs / 60000)
+  const diffHours = Math.floor(diffMs / 3600000)
+  const diffDays = Math.floor(diffMs / 86400000)
+
+  // Format time in Bogotá timezone (America/Bogota = UTC-5)
+  const timeStr = date.toLocaleTimeString('es-CO', {
+    timeZone: 'America/Bogota',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
+
+  // Relative time with exact time for clarity
+  if (diffMins < 1) return `Hace un momento (${timeStr})`
+  if (diffMins < 60) return `Hace ${diffMins} min (${timeStr})`
+  if (diffHours < 24) return `Hace ${diffHours}h (${timeStr})`
+  if (diffDays === 0) return `Hoy ${timeStr}`
+  if (diffDays === 1) return `Ayer ${timeStr}`
+
+  // Absolute date with time for older dates (Bogotá time)
+  return date.toLocaleDateString('es-CO', {
+    timeZone: 'America/Bogota',
+    day: 'numeric',
+    month: 'short',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
 }
 
 const loadLeaderboard = async () => {

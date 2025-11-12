@@ -37,24 +37,46 @@ router.get('/questions', (req, res) => {
       return res.status(404).json({ error: 'User not found. Please register first.' });
     }
 
-    // Get questions (game status check removed - handled by WaitingView)
-    db.all('SELECT * FROM questions ORDER BY created_at', (err, rows) => {
+    // Get already answered question IDs for this user
+    db.all('SELECT question_id FROM scores WHERE user_id = ?', [userId], (err, answeredRows) => {
       if (err) {
-        console.error('Error fetching questions:', err);
-        return res.status(500).json({ error: 'Failed to fetch questions' });
+        console.error('Error fetching answered questions:', err);
+        return res.status(500).json({ error: 'Failed to fetch answered questions' });
       }
 
-      const questions = rows.map(row => ({
-        id: row.id,
-        graphData: JSON.parse(row.graph_json),
-        questionText: row.question_text,
-        options: JSON.parse(row.options_json),
-        allowMultipleAnswers: row.allow_multiple_answers === 1,
-        tip: row.tip
-        // Note: correct_answer and correct_answers_json are not included for security
-      }));
+      const answeredQuestionIds = answeredRows.map(row => row.question_id);
 
-      res.json(questions);
+      // Get questions (game status check removed - handled by WaitingView)
+      // Filter out already answered questions
+      let query = 'SELECT * FROM questions';
+      let params = [];
+
+      if (answeredQuestionIds.length > 0) {
+        const placeholders = answeredQuestionIds.map(() => '?').join(',');
+        query += ` WHERE id NOT IN (${placeholders})`;
+        params = answeredQuestionIds;
+      }
+
+      query += ' ORDER BY created_at';
+
+      db.all(query, params, (err, rows) => {
+        if (err) {
+          console.error('Error fetching questions:', err);
+          return res.status(500).json({ error: 'Failed to fetch questions' });
+        }
+
+        const questions = rows.map(row => ({
+          id: row.id,
+          graphData: JSON.parse(row.graph_json),
+          questionText: row.question_text,
+          options: JSON.parse(row.options_json),
+          allowMultipleAnswers: row.allow_multiple_answers === 1,
+          tip: row.tip
+          // Note: correct_answer and correct_answers_json are not included for security
+        }));
+
+        res.json(questions);
+      });
     });
   });
 });
@@ -188,7 +210,7 @@ router.get('/leaderboard', (req, res) => {
     FROM users u
     LEFT JOIN scores s ON u.id = s.user_id
     GROUP BY u.id, u.name
-    ORDER BY score DESC, finish_time ASC
+    ORDER BY correct_answers DESC, finish_time ASC
   `;
 
   db.all(query, (err, rows) => {

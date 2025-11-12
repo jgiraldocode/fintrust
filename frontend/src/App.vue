@@ -8,30 +8,6 @@
   </div>
 </template>
 
-<script setup>
-import { onMounted } from 'vue'
-import { useGameStore } from '@/stores/game'
-import { getGameState } from '@/api'
-
-const gameStore = useGameStore()
-
-// Check game state periodically
-onMounted(() => {
-  const checkGameState = async () => {
-    try {
-      const response = await getGameState()
-      gameStore.setGameActive(response.data.isActive)
-    } catch (error) {
-      console.error('Error checking game state:', error)
-    }
-  }
-
-  checkGameState()
-  // Check every 5 seconds
-  setInterval(checkGameState, 5000)
-})
-</script>
-
 <style>
 .fade-enter-active,
 .fade-leave-active {

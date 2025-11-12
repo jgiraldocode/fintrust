@@ -16,6 +16,27 @@
       </div>
     </div>
 
+    <!-- All questions completed message -->
+    <div v-else-if="allQuestionsCompleted" class="card">
+      <div class="text-center">
+        <div class="text-6xl mb-4">🎉</div>
+        <h2 class="text-2xl md:text-3xl font-bold text-green-600 mb-4">
+          ¡Felicidades!
+        </h2>
+        <p class="text-lg md:text-xl text-gray-700 mb-6">
+          Ya has completado todas las preguntas disponibles.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-3 justify-center">
+          <button @click="router.push('/leaderboard')" class="btn-primary">
+            📊 Ver Clasificación
+          </button>
+          <button @click="goHome" class="btn-secondary">
+            🏠 Volver al Inicio
+          </button>
+        </div>
+      </div>
+    </div>
+
     <div v-else-if="currentQuestion" class="space-y-3 md:space-y-4 relative">
       <!-- Indicador compacto de progreso - Flotante en la esquina inferior derecha (oculto durante tutorial) -->
       <div v-if="!showTutorial" class="fixed bottom-4 right-4 z-50 bg-white/95 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg border-2 border-primary-300">
@@ -149,6 +170,7 @@ const selectedAnswers = ref([]) // Multiple answers: number[]
 const answerResult = ref(null)
 const correctAnswers = ref(0)
 const showTutorial = ref(true)
+const allQuestionsCompleted = ref(false)
 
 const currentQuestion = computed(() => {
   return gameStore.questions[gameStore.currentQuestionIndex]
@@ -166,21 +188,30 @@ onMounted(async () => {
   // Verify user is authenticated
   if (!userStore.userId) {
     console.log('Usuario no autenticado, redirigiendo a registro...')
+    userStore.clearUser() // Clear stale data
     router.push('/register')
     return
   }
 
   try {
     const response = await getQuestions(userStore.userId)
-    gameStore.setQuestions(response.data)
+
+    // Check if there are any questions left to answer
+    if (response.data.length === 0) {
+      allQuestionsCompleted.value = true
+    } else {
+      gameStore.setQuestions(response.data)
+    }
   } catch (err) {
     if (err.response?.status === 404) {
       // Usuario no encontrado en la base de datos, redirigir a registro
       console.log('Usuario no encontrado, redirigiendo a registro...')
+      userStore.clearUser() // Clear invalid user data
       router.push('/register')
     } else if (err.response?.status === 400) {
       // Error de validación, redirigir a registro
       console.log('Error de validación, redirigiendo a registro...')
+      userStore.clearUser() // Clear invalid user data
       router.push('/register')
     } else {
       error.value = err.response?.data?.error || 'No se pudieron cargar las preguntas.'
@@ -226,8 +257,6 @@ const submitSelectedAnswer = async () => {
     }
   }
 
-  answered.value = true
-
   try {
     const answerToSend = isMultiple ? selectedAnswers.value : selectedAnswer.value
 
@@ -238,6 +267,9 @@ const submitSelectedAnswer = async () => {
     )
 
     answerResult.value = response.data
+
+    // Set answered AFTER we have the result to prevent red flash
+    answered.value = true
 
     if (response.data.isCorrect) {
       correctAnswers.value++
