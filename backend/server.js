@@ -1,7 +1,11 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const db = require('./database/db');
+
+// Use Turso-compatible DB in production, SQLite locally
+const db = process.env.TURSO_DATABASE_URL
+  ? require('./database/db-turso')
+  : require('./database/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -49,15 +53,25 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-// Initialize database and start server
-db.initialize().then(() => {
-  app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
+// Initialize database
+// For Vercel serverless, we initialize on each cold start
+if (process.env.VERCEL) {
+  console.log('🚀 Running on Vercel (Serverless)');
+  db.initialize().catch(err => {
+    console.error('Failed to initialize database:', err);
   });
-}).catch(err => {
-  console.error('Failed to initialize database:', err);
-  process.exit(1);
-});
+} else {
+  // Local development - start server
+  db.initialize().then(() => {
+    app.listen(PORT, () => {
+      console.log(`🚀 Server is running on port ${PORT}`);
+      console.log(`📊 Health check: http://localhost:${PORT}/health`);
+    });
+  }).catch(err => {
+    console.error('Failed to initialize database:', err);
+    process.exit(1);
+  });
+}
 
 module.exports = app;
 

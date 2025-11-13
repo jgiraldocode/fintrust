@@ -12,14 +12,35 @@ Esta guía te ayudará a desplegar la aplicación FinTrust Quiz en servicios gra
 
 ## 🌟 Servicios Recomendados
 
-### Backend: **Render.com**
-- ✅ Tier gratuito permanente
-- ✅ Soporta Node.js + SQLite con almacenamiento persistente
-- ✅ 750 horas/mes gratis
+### ⚠️ IMPORTANTE: SQLite y Persistencia
+
+**El tier gratuito de Render.com NO soporta discos persistentes**, por lo que SQLite perderá datos en cada redeploy.
+
+### Mejores Alternativas GRATUITAS con SQLite:
+
+#### Opción 1: **Railway.app** (RECOMENDADO) ⭐
+- ✅ **$5 USD de crédito gratis/mes** (suficiente para proyectos pequeños)
+- ✅ **Volúmenes persistentes incluidos** en tier gratuito
+- ✅ SQLite con datos permanentes
 - ✅ Auto-deploy desde GitHub
+- ✅ No se duerme (siempre activo)
+- 🔗 [railway.app](https://railway.app)
+
+#### Opción 2: **Fly.io** (Buena alternativa)
+- ✅ **3 VMs gratis** (256MB RAM cada una)
+- ✅ **3GB de volumen persistente gratis**
+- ✅ SQLite con datos permanentes
+- ✅ Auto-deploy desde GitHub
+- ✅ Regiones globales
+- 🔗 [fly.io](https://fly.io)
+
+#### Opción 3: **Render.com con PostgreSQL** (Si quieres quedarte en Render)
+- ✅ Tier gratuito permanente
+- ✅ PostgreSQL gratis (90 días de datos)
+- ⚠️ Requiere migrar de SQLite a PostgreSQL
 - 🔗 [render.com](https://render.com)
 
-### Frontend: **Vercel**
+### Frontend: **Vercel** (Sin cambios)
 - ✅ Completamente gratuito para proyectos personales
 - ✅ Optimizado para Vite/Vue
 - ✅ CDN global ultra-rápido
@@ -28,12 +49,107 @@ Esta guía te ayudará a desplegar la aplicación FinTrust Quiz en servicios gra
 
 ## 📦 Despliegue del Backend
 
-### Paso 1: Preparación
+Elige UNA de estas opciones según tus necesidades:
 
-1. Crea una cuenta en [Render.com](https://render.com)
-2. Conecta tu repositorio de GitHub
+---
 
-### Paso 2: Crear Web Service
+### 🚂 OPCIÓN A: Railway.app (RECOMENDADO para SQLite)
+
+#### Paso 1: Preparación
+1. Crea una cuenta en [Railway.app](https://railway.app)
+2. Conecta tu cuenta de GitHub
+
+#### Paso 2: Crear Proyecto
+1. Click en "New Project"
+2. Selecciona "Deploy from GitHub repo"
+3. Elige tu repositorio
+
+#### Paso 3: Configurar Servicio
+1. Railway detectará automáticamente Node.js
+2. Configura:
+   - **Root Directory**: Déjalo vacío o pon `backend`
+   - **Build Command**: `cd backend && npm install`
+   - **Start Command**: `cd backend && npm start`
+
+#### Paso 4: Agregar Volumen Persistente
+1. En tu servicio, ve a la pestaña "Settings"
+2. Scroll hasta "Volumes"
+3. Click "Add Volume"
+4. Configura:
+   - **Mount Path**: `/app/backend/database`
+   - Esto hará que tu base de datos SQLite sea persistente
+
+#### Paso 5: Variables de Entorno
+En la pestaña "Variables", agrega:
+```
+NODE_ENV=production
+PORT=3000
+FRONTEND_URL=https://tu-app.vercel.app
+ADMIN_PASSWORD=tu-password-seguro
+```
+
+#### Paso 6: Deploy
+Railway desplegará automáticamente. Tu backend estará en:
+`https://tu-proyecto.up.railway.app`
+
+**Crédito Gratis**: $5/mes es suficiente para ~500-1000 usuarios activos/mes.
+
+---
+
+### ✈️ OPCIÓN B: Fly.io (Alternativa con más control)
+
+#### Paso 1: Instalación
+1. Crea cuenta en [Fly.io](https://fly.io)
+2. Instala Fly CLI:
+```bash
+# macOS
+brew install flyctl
+
+# Linux/WSL
+curl -L https://fly.io/install.sh | sh
+
+# Windows
+iwr https://fly.io/install.ps1 -useb | iex
+```
+
+#### Paso 2: Login y Setup
+```bash
+# Login
+flyctl auth login
+
+# Ir a la carpeta del proyecto
+cd /path/to/fintrust
+
+# Crear app (usa el archivo fly.toml incluido)
+flyctl launch --no-deploy
+
+# Crear volumen persistente para SQLite
+flyctl volumes create fintrust_data --size 1 --region mia
+```
+
+#### Paso 3: Variables de Entorno
+```bash
+flyctl secrets set FRONTEND_URL=https://tu-app.vercel.app
+flyctl secrets set ADMIN_PASSWORD=tu-password-seguro
+flyctl secrets set NODE_ENV=production
+```
+
+#### Paso 4: Deploy
+```bash
+flyctl deploy
+```
+
+Tu backend estará en: `https://tu-app.fly.dev`
+
+**Tier Gratis**: 3 VMs con 3GB de almacenamiento permanente.
+
+---
+
+### 🎨 OPCIÓN C: Render.com (Solo si migras a PostgreSQL)
+
+**⚠️ NOTA**: Render free tier NO soporta SQLite persistente. Debes migrar a PostgreSQL.
+
+#### Paso 2: Crear Web Service
 
 1. Click en "New +" → "Web Service"
 2. Selecciona tu repositorio

@@ -6,7 +6,8 @@
     "install-all": "cd backend && npm install && cd ../frontend && npm install",
     "backend": "cd backend && npm start",
     "frontend": "cd frontend && npm run dev",
-    "dev": "echo 'Please run backend and frontend in separate terminals' && echo 'Terminal 1: npm run backend' && echo 'Terminal 2: npm run frontend'"
+    "dev": "echo 'Please run backend and frontend in separate terminals' && echo 'Terminal 1: npm run backend' && echo 'Terminal 2: npm run frontend'",
+    "build:all": "cd frontend && npm install && npm run build"
   },
   "keywords": [
     "quiz",
