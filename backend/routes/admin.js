@@ -7,14 +7,18 @@ const { adminAuth } = require('../middleware/auth');
 // Apply admin authentication to all routes
 router.use(adminAuth);
 
-// Toggle game state
+// Toggle game state (legacy endpoint - kept for backward compatibility)
 router.post('/game-state', (req, res) => {
-  const { isActive } = req.body;
+  const { isActive, section } = req.body;
   const db = getDb();
 
+  // If section is provided, set active_section; otherwise set to null
+  const activeSection = isActive && section ? section : null;
+  const isActiveFlag = isActive ? 1 : 0;
+
   db.run(
-    'UPDATE game_state SET is_active = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1',
-    [isActive ? 1 : 0],
+    'UPDATE game_state SET is_active = ?, active_section = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1',
+    [isActiveFlag, activeSection],
     function(err) {
       if (err) {
         console.error('Error updating game state:', err);
@@ -23,7 +27,39 @@ router.post('/game-state', (req, res) => {
 
       res.json({
         isActive: Boolean(isActive),
-        message: `Game ${isActive ? 'started' : 'stopped'} successfully`
+        activeSection: activeSection,
+        message: `Game ${isActive ? 'started' : 'stopped'} successfully${section ? ` (Section ${section})` : ''}`
+      });
+    }
+  );
+});
+
+// Start/Stop specific section
+router.post('/game-state/section/:sectionNumber', (req, res) => {
+  const sectionNumber = parseInt(req.params.sectionNumber);
+  const { isActive } = req.body;
+  const db = getDb();
+
+  if (isNaN(sectionNumber) || sectionNumber < 1) {
+    return res.status(400).json({ error: 'Invalid section number' });
+  }
+
+  const activeSection = isActive ? sectionNumber : null;
+  const isActiveFlag = isActive ? 1 : 0;
+
+  db.run(
+    'UPDATE game_state SET is_active = ?, active_section = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1',
+    [isActiveFlag, activeSection],
+    function(err) {
+      if (err) {
+        console.error('Error updating game state for section:', err);
+        return res.status(500).json({ error: 'Failed to update game state' });
+      }
+
+      res.json({
+        isActive: Boolean(isActive),
+        activeSection: activeSection,
+        message: `Section ${sectionNumber} ${isActive ? 'started' : 'stopped'} successfully`
       });
     }
   );
@@ -49,6 +85,7 @@ router.get('/questions', (req, res) => {
       correctAnswers: row.correct_answers_json ? JSON.parse(row.correct_answers_json) : [],
       allowMultipleAnswers: row.allow_multiple_answers === 1,
       tip: row.tip,
+      section: row.section || 1,
       createdAt: row.created_at
     }));
 
@@ -58,7 +95,7 @@ router.get('/questions', (req, res) => {
 
 // Create new question
 router.post('/questions', (req, res) => {
-  const { graphJson, questionText, options, correctAnswer, correctAnswers, allowMultipleAnswers, tip } = req.body;
+  const { graphJson, questionText, options, correctAnswer, correctAnswers, allowMultipleAnswers, tip, section } = req.body;
 
   // Validation
   if (!graphJson || !questionText || !options) {
@@ -108,10 +145,11 @@ router.post('/questions', (req, res) => {
 
   const questionId = uuidv4();
   const db = getDb();
+  const questionSection = section || 1; // Default to section 1 if not provided
 
   db.run(
-    'INSERT INTO questions (id, graph_json, question_text, options_json, correct_answer, correct_answers_json, allow_multiple_answers, tip) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-    [questionId, graphJson, questionText, JSON.stringify(options), singleAnswer, correctAnswersJson, isMultipleAnswers ? 1 : 0, tip || ''],
+    'INSERT INTO questions (id, graph_json, question_text, options_json, correct_answer, correct_answers_json, allow_multiple_answers, tip, section) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+    [questionId, graphJson, questionText, JSON.stringify(options), singleAnswer, correctAnswersJson, isMultipleAnswers ? 1 : 0, tip || '', questionSection],
     function(err) {
       if (err) {
         console.error('Error creating question:', err);
@@ -129,7 +167,7 @@ router.post('/questions', (req, res) => {
 // Update question
 router.put('/questions/:id', (req, res) => {
   const { id } = req.params;
-  const { graphJson, questionText, options, correctAnswer, correctAnswers, allowMultipleAnswers, tip } = req.body;
+  const { graphJson, questionText, options, correctAnswer, correctAnswers, allowMultipleAnswers, tip, section } = req.body;
 
   // Validation
   if (!graphJson || !questionText || !options) {
@@ -178,10 +216,11 @@ router.put('/questions/:id', (req, res) => {
   }
 
   const db = getDb();
+  const questionSection = section || 1; // Default to section 1 if not provided
 
   db.run(
-    'UPDATE questions SET graph_json = ?, question_text = ?, options_json = ?, correct_answer = ?, correct_answers_json = ?, allow_multiple_answers = ?, tip = ? WHERE id = ?',
-    [graphJson, questionText, JSON.stringify(options), singleAnswer, correctAnswersJson, isMultipleAnswers ? 1 : 0, tip || '', id],
+    'UPDATE questions SET graph_json = ?, question_text = ?, options_json = ?, correct_answer = ?, correct_answers_json = ?, allow_multiple_answers = ?, tip = ?, section = ? WHERE id = ?',
+    [graphJson, questionText, JSON.stringify(options), singleAnswer, correctAnswersJson, isMultipleAnswers ? 1 : 0, tip || '', questionSection, id],
     function(err) {
       if (err) {
         console.error('Error updating question:', err);

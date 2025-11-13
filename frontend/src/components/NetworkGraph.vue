@@ -39,6 +39,7 @@ const props = defineProps({
 const svgRef = ref(null)
 const graphWrapper = ref(null)
 const currentZoom = ref(1)
+const markerId = ref(`arrow-${Math.random().toString(36).substr(2, 9)}`)
 
 let svg, g, simulation, zoomBehavior
 
@@ -129,13 +130,13 @@ const initGraph = () => {
   const nodes = JSON.parse(JSON.stringify(props.graphData.nodes))
   const links = JSON.parse(JSON.stringify(props.graphData.links))
 
-  // Create arrow markers for links (dynamic positioning)
+  // Create arrow markers for links (dynamic positioning with unique ID)
   svg.append('defs').selectAll('marker')
-    .data(['end'])
+    .data([markerId.value])
     .join('marker')
     .attr('id', d => d)
     .attr('viewBox', '0 -5 10 10')
-    .attr('refX', 10)
+    .attr('refX', 8)
     .attr('refY', 0)
     .attr('markerWidth', 8)
     .attr('markerHeight', 8)
@@ -153,7 +154,7 @@ const initGraph = () => {
     .attr('stroke', '#8b5cf6')
     .attr('stroke-opacity', 0.6)
     .attr('stroke-width', d => Math.max(2, Math.sqrt((d.strength || 1) * 6)))
-    .attr('marker-end', 'url(#end)')
+    .attr('marker-end', `url(#${markerId.value})`)
 
   // Link labels removed - percentages not used
 

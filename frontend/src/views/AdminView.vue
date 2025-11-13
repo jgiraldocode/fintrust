@@ -76,32 +76,79 @@
         <div v-if="activeTab === 'general'" class="space-y-6">
           <!-- Game Controls -->
           <div class="card">
-          <h2 class="text-2xl font-bold mb-4">Control del Juego</h2>
-          <div class="flex items-center gap-4">
-            <button
-              @click="toggleGameState(true)"
-              :disabled="gameState.isActive"
-              class="btn-success flex-1"
-              :class="{ 'opacity-50 cursor-not-allowed': gameState.isActive }"
-            >
-              ▶️ Iniciar Juego
-            </button>
-            <button
-              @click="toggleGameState(false)"
-              :disabled="!gameState.isActive"
-              class="btn-danger flex-1"
-              :class="{ 'opacity-50 cursor-not-allowed': !gameState.isActive }"
-            >
-              ⏸️ Detener Juego
-            </button>
+            <h2 class="text-2xl font-bold mb-6">Control del Juego</h2>
+
+            <!-- Round 1 Controls -->
+            <div class="mb-6 p-4 bg-blue-50 rounded-lg border-2 border-blue-200">
+              <h3 class="text-xl font-bold mb-3 text-blue-900">🎯 Ronda 1</h3>
+              <div class="flex items-center gap-3 mb-3">
+                <button
+                  @click="toggleSection(1, true)"
+                  :disabled="gameState.activeSection === 1"
+                  class="btn-success flex-1"
+                  :class="{ 'opacity-50 cursor-not-allowed': gameState.activeSection === 1 }"
+                >
+                  ▶️ Iniciar Ronda 1
+                </button>
+                <button
+                  @click="toggleSection(1, false)"
+                  :disabled="gameState.activeSection !== 1"
+                  class="btn-danger flex-1"
+                  :class="{ 'opacity-50 cursor-not-allowed': gameState.activeSection !== 1 }"
+                >
+                  ⏸️ Detener Ronda 1
+                </button>
+              </div>
+              <p class="text-sm">
+                Estado:
+                <span :class="gameState.activeSection === 1 ? 'text-green-600 font-bold' : 'text-gray-600 font-bold'">
+                  {{ gameState.activeSection === 1 ? '🟢 ACTIVA' : '🔴 INACTIVA' }}
+                </span>
+              </p>
+            </div>
+
+            <!-- Round 2 Controls -->
+            <div class="mb-6 p-4 bg-green-50 rounded-lg border-2 border-green-200">
+              <h3 class="text-xl font-bold mb-3 text-green-900">🎯 Ronda 2</h3>
+              <div class="flex items-center gap-3 mb-3">
+                <button
+                  @click="toggleSection(2, true)"
+                  :disabled="gameState.activeSection === 2"
+                  class="btn-success flex-1"
+                  :class="{ 'opacity-50 cursor-not-allowed': gameState.activeSection === 2 }"
+                >
+                  ▶️ Iniciar Ronda 2
+                </button>
+                <button
+                  @click="toggleSection(2, false)"
+                  :disabled="gameState.activeSection !== 2"
+                  class="btn-danger flex-1"
+                  :class="{ 'opacity-50 cursor-not-allowed': gameState.activeSection !== 2 }"
+                >
+                  ⏸️ Detener Ronda 2
+                </button>
+              </div>
+              <p class="text-sm">
+                Estado:
+                <span :class="gameState.activeSection === 2 ? 'text-green-600 font-bold' : 'text-gray-600 font-bold'">
+                  {{ gameState.activeSection === 2 ? '🟢 ACTIVA' : '🔴 INACTIVA' }}
+                </span>
+              </p>
+            </div>
+
+            <!-- Overall Status -->
+            <div class="p-4 bg-gray-100 rounded-lg">
+              <p class="text-lg">
+                Estado General:
+                <span :class="gameState.isActive ? 'text-green-600 font-bold' : 'text-red-600 font-bold'">
+                  {{ gameState.isActive ? '🟢 JUEGO ACTIVO' : '🔴 JUEGO DETENIDO' }}
+                </span>
+                <span v-if="gameState.activeSection" class="ml-2 text-sm text-gray-600">
+                  (Ronda {{ gameState.activeSection }} activa)
+                </span>
+              </p>
+            </div>
           </div>
-          <p class="mt-4 text-lg">
-            Estado:
-            <span :class="gameState.isActive ? 'text-green-600 font-bold' : 'text-red-600 font-bold'">
-              {{ gameState.isActive ? '🟢 ACTIVO' : '🔴 INACTIVO' }}
-            </span>
-          </p>
-        </div>
 
           <!-- Stats -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -241,6 +288,18 @@
                 </p>
               </div>
 
+              <!-- Round selector -->
+              <div>
+                <label class="block text-lg font-medium mb-2">Ronda</label>
+                <select v-model.number="questionForm.section" class="input" required>
+                  <option :value="1">🎯 Ronda 1</option>
+                  <option :value="2">🎯 Ronda 2</option>
+                </select>
+                <p class="text-sm text-gray-600 mt-2">
+                  Selecciona a qué ronda pertenece esta pregunta. Las preguntas solo aparecerán cuando su ronda esté activa.
+                </p>
+              </div>
+
               <div>
                 <label class="block text-lg font-medium mb-2">Consejo (opcional)</label>
                 <textarea
@@ -291,7 +350,15 @@
             >
               <div class="flex justify-between items-start gap-4">
                 <div class="flex-1">
-                  <h4 class="font-bold text-lg mb-2">{{ question.questionText }}</h4>
+                  <div class="flex items-center gap-2 mb-2">
+                    <h4 class="font-bold text-lg">{{ question.questionText }}</h4>
+                    <span
+                      class="px-2 py-1 rounded text-xs font-bold"
+                      :class="question.section === 2 ? 'bg-green-200 text-green-800' : 'bg-blue-200 text-blue-800'"
+                    >
+                      {{ question.section === 2 ? '🎯 R2' : '🎯 R1' }}
+                    </span>
+                  </div>
                   <div class="text-sm text-gray-600 space-y-1">
                     <p>Opciones: {{ question.options.length }}</p>
                     <p>Correcta: Opción {{ question.correctAnswer + 1 }}</p>
@@ -378,7 +445,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   getAdminQuestions,
@@ -386,6 +453,7 @@ import {
   updateQuestion,
   deleteQuestion,
   setGameState,
+  setSectionState,
   getAdminUsers,
   resetScores,
   deleteAllUsers,
@@ -402,7 +470,10 @@ const loading = ref(false)
 const error = ref('')
 const activeTab = ref('general')
 
-const gameState = ref({ isActive: false })
+const gameState = ref({
+  isActive: false,
+  activeSection: null
+})
 const questions = ref([])
 const users = ref([])
 
@@ -418,7 +489,8 @@ const questionForm = ref({
   correctAnswer: 0,
   correctAnswers: [],
   allowMultipleAnswers: false,
-  tip: ''
+  tip: '',
+  section: 1
 })
 
 const handleLogin = async () => {
@@ -453,12 +525,13 @@ const loadDashboard = async () => {
   }
 }
 
-const toggleGameState = async (isActive) => {
+const toggleSection = async (sectionNumber, isActive) => {
   try {
-    await setGameState(isActive, password.value)
-    gameState.value.isActive = isActive
+    const response = await setSectionState(sectionNumber, isActive, password.value)
+    gameState.value.isActive = response.data.isActive
+    gameState.value.activeSection = response.data.activeSection
   } catch (err) {
-    alert('No se pudo actualizar el estado del juego')
+    alert(`No se pudo actualizar el estado de la Sección ${sectionNumber}`)
   }
 }
 
@@ -500,7 +573,8 @@ const saveQuestion = async () => {
       graphJson: questionForm.value.graphJson,
       options: questionForm.value.options,
       allowMultipleAnswers: questionForm.value.allowMultipleAnswers,
-      tip: questionForm.value.tip
+      tip: questionForm.value.tip,
+      section: questionForm.value.section || 1
     }
 
     // Add correct answer(s) based on type
@@ -535,7 +609,8 @@ const editQuestion = (question) => {
     correctAnswer: question.correctAnswer || 0,
     correctAnswers: question.correctAnswers || [],
     allowMultipleAnswers: question.allowMultipleAnswers || false,
-    tip: question.tip || ''
+    tip: question.tip || '',
+    section: question.section || 1
   }
   showCreateForm.value = false
 }
@@ -561,7 +636,8 @@ const cancelEdit = () => {
     correctAnswer: 0,
     correctAnswers: [],
     allowMultipleAnswers: false,
-    tip: ''
+    tip: '',
+    section: 1
   }
 }
 

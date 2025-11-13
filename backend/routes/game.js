@@ -7,13 +7,16 @@ const { getDb } = require('../database/db');
 router.get('/game-state', (req, res) => {
   const db = getDb();
 
-  db.get('SELECT is_active FROM game_state WHERE id = 1', (err, row) => {
+  db.get('SELECT is_active, active_section FROM game_state WHERE id = 1', (err, row) => {
     if (err) {
       console.error('Error fetching game state:', err);
       return res.status(500).json({ error: 'Failed to fetch game state' });
     }
 
-    res.json({ isActive: row ? Boolean(row.is_active) : false });
+    res.json({
+      isActive: row ? Boolean(row.is_active) : false,
+      activeSection: row ? row.active_section : null
+    });
   });
 });
 
@@ -37,45 +40,62 @@ router.get('/questions', (req, res) => {
       return res.status(404).json({ error: 'User not found. Please register first.' });
     }
 
-    // Get already answered question IDs for this user
-    db.all('SELECT question_id FROM scores WHERE user_id = ?', [userId], (err, answeredRows) => {
+    // Get active section from game state
+    db.get('SELECT active_section FROM game_state WHERE id = 1', (err, gameState) => {
       if (err) {
-        console.error('Error fetching answered questions:', err);
-        return res.status(500).json({ error: 'Failed to fetch answered questions' });
+        console.error('Error fetching game state:', err);
+        return res.status(500).json({ error: 'Failed to fetch game state' });
       }
 
-      const answeredQuestionIds = answeredRows.map(row => row.question_id);
+      const activeSection = gameState ? gameState.active_section : null;
 
-      // Get questions (game status check removed - handled by WaitingView)
-      // Filter out already answered questions
-      let query = 'SELECT * FROM questions';
-      let params = [];
-
-      if (answeredQuestionIds.length > 0) {
-        const placeholders = answeredQuestionIds.map(() => '?').join(',');
-        query += ` WHERE id NOT IN (${placeholders})`;
-        params = answeredQuestionIds;
-      }
-
-      query += ' ORDER BY created_at';
-
-      db.all(query, params, (err, rows) => {
+      // Get already answered question IDs for this user
+      db.all('SELECT question_id FROM scores WHERE user_id = ?', [userId], (err, answeredRows) => {
         if (err) {
-          console.error('Error fetching questions:', err);
-          return res.status(500).json({ error: 'Failed to fetch questions' });
+          console.error('Error fetching answered questions:', err);
+          return res.status(500).json({ error: 'Failed to fetch answered questions' });
         }
 
-        const questions = rows.map(row => ({
-          id: row.id,
-          graphData: JSON.parse(row.graph_json),
-          questionText: row.question_text,
-          options: JSON.parse(row.options_json),
-          allowMultipleAnswers: row.allow_multiple_answers === 1,
-          tip: row.tip
-          // Note: correct_answer and correct_answers_json are not included for security
-        }));
+        const answeredQuestionIds = answeredRows.map(row => row.question_id);
 
-        res.json(questions);
+        // Build query to get questions from active section only
+        let query = 'SELECT * FROM questions WHERE 1=1';
+        let params = [];
+
+        // Filter by active section
+        if (activeSection !== null) {
+          query += ' AND section = ?';
+          params.push(activeSection);
+        }
+
+        // Filter out already answered questions
+        if (answeredQuestionIds.length > 0) {
+          const placeholders = answeredQuestionIds.map(() => '?').join(',');
+          query += ` AND id NOT IN (${placeholders})`;
+          params.push(...answeredQuestionIds);
+        }
+
+        query += ' ORDER BY created_at';
+
+        db.all(query, params, (err, rows) => {
+          if (err) {
+            console.error('Error fetching questions:', err);
+            return res.status(500).json({ error: 'Failed to fetch questions' });
+          }
+
+          const questions = rows.map(row => ({
+            id: row.id,
+            graphData: JSON.parse(row.graph_json),
+            questionText: row.question_text,
+            options: JSON.parse(row.options_json),
+            allowMultipleAnswers: row.allow_multiple_answers === 1,
+            tip: row.tip,
+            section: row.section || 1
+            // Note: correct_answer and correct_answers_json are not included for security
+          }));
+
+          res.json(questions);
+        });
       });
     });
   });
@@ -117,9 +137,9 @@ router.post('/answer', (req, res) => {
           return res.status(400).json({ error: 'Question already answered' });
         }
 
-        // Get the correct answer(s)
+        // Get the correct answer(s) and section
         db.get(
-          'SELECT correct_answer, correct_answers_json, allow_multiple_answers, tip, options_json FROM questions WHERE id = ?',
+          'SELECT correct_answer, correct_answers_json, allow_multiple_answers, tip, options_json, section FROM questions WHERE id = ?',
           [questionId],
           (err, question) => {
             if (err) {
@@ -166,10 +186,11 @@ router.post('/answer', (req, res) => {
 
             // Save the score (store as integer for backward compatibility, multiply by 100 for precision)
             const scoreValue = Math.round(score * 100);
+            const questionSection = question.section || 1;
 
             db.run(
-              'INSERT INTO scores (id, user_id, question_id, is_correct) VALUES (?, ?, ?, ?)',
-              [scoreId, userId, questionId, scoreValue],
+              'INSERT INTO scores (id, user_id, question_id, is_correct, section) VALUES (?, ?, ?, ?, ?)',
+              [scoreId, userId, questionId, scoreValue, questionSection],
               function(err) {
                 if (err) {
                   console.error('Error saving score:', err);
@@ -193,13 +214,15 @@ router.post('/answer', (req, res) => {
 
 // Get leaderboard
 router.get('/leaderboard', (req, res) => {
+  const { section } = req.query; // section can be: 1, 2, or 'combined' (or undefined for all)
   const db = getDb();
 
   // Note: All scores are stored as 0-100 (both single and multiple answer questions)
   // - correct_answers: sum of fractional scores (is_correct / 100)
   //   Example: 100 + 75 + 50 = 225, divided by 100 = 2.25 correct answers
   // - score: average of all scores (already in 0-100 scale)
-  const query = `
+
+  let query = `
     SELECT
       u.id,
       u.name,
@@ -209,11 +232,25 @@ router.get('/leaderboard', (req, res) => {
       MAX(s.answered_at) as finish_time
     FROM users u
     LEFT JOIN scores s ON u.id = s.user_id
+  `;
+
+  const params = [];
+
+  // Filter by section if specified and not 'combined'
+  if (section && section !== 'combined') {
+    const sectionNum = parseInt(section);
+    if (!isNaN(sectionNum)) {
+      query += ' AND s.section = ?';
+      params.push(sectionNum);
+    }
+  }
+
+  query += `
     GROUP BY u.id, u.name
     ORDER BY correct_answers DESC, finish_time ASC
   `;
 
-  db.all(query, (err, rows) => {
+  db.all(query, params, (err, rows) => {
     if (err) {
       console.error('Error fetching leaderboard:', err);
       return res.status(500).json({ error: 'Failed to fetch leaderboard' });

@@ -30,6 +30,7 @@ const initialize = () => {
           options_json TEXT NOT NULL,
           correct_answer INTEGER NOT NULL,
           tip TEXT,
+          section INTEGER DEFAULT 1,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
       `, (err) => {
@@ -46,6 +47,7 @@ const initialize = () => {
           user_id TEXT NOT NULL,
           question_id TEXT NOT NULL,
           is_correct INTEGER NOT NULL,
+          section INTEGER NOT NULL,
           answered_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id),
           FOREIGN KEY (question_id) REFERENCES questions(id)
@@ -62,6 +64,7 @@ const initialize = () => {
         CREATE TABLE IF NOT EXISTS game_state (
           id INTEGER PRIMARY KEY CHECK (id = 1),
           is_active INTEGER DEFAULT 0,
+          active_section INTEGER DEFAULT NULL,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
       `, (err) => {
@@ -73,7 +76,7 @@ const initialize = () => {
 
       // Insert default game state if not exists
       db.run(`
-        INSERT OR IGNORE INTO game_state (id, is_active) VALUES (1, 0)
+        INSERT OR IGNORE INTO game_state (id, is_active, active_section) VALUES (1, 0, NULL)
       `, (err) => {
         if (err) {
           console.error('Error inserting default game state:', err);

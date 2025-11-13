@@ -14,7 +14,10 @@ export const getGameState = () => api.get('/game-state')
 export const getQuestions = (userId) => api.get('/questions', { params: { userId } })
 export const submitAnswer = (userId, questionId, answer) =>
   api.post('/answer', { userId, questionId, answer })
-export const getLeaderboard = () => api.get('/leaderboard')
+export const getLeaderboard = (section = null) => {
+  const params = section ? { section } : {}
+  return api.get('/leaderboard', { params })
+}
 export const getUserScore = (userId) => api.get(`/user-score/${userId}`)
 
 // Admin endpoints
@@ -24,8 +27,11 @@ const getAuthHeaders = (password) => ({
   }
 })
 
-export const setGameState = (isActive, password) =>
-  api.post('/admin/game-state', { isActive }, getAuthHeaders(password))
+export const setGameState = (isActive, password, section = null) =>
+  api.post('/admin/game-state', { isActive, section }, getAuthHeaders(password))
+
+export const setSectionState = (sectionNumber, isActive, password) =>
+  api.post(`/admin/game-state/section/${sectionNumber}`, { isActive }, getAuthHeaders(password))
 
 export const getAdminQuestions = (password) =>
   api.get('/admin/questions', getAuthHeaders(password))

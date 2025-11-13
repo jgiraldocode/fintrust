@@ -18,8 +18,8 @@
       </div>
 
       <!-- Section 2: Graph Area - Takes remaining space between controls and tutorial -->
-      <div class="flex-1 min-h-0 p-2 md:p-3 overflow-hidden bg-gray-50">
-        <div class="h-full w-full">
+      <div class="flex-1 min-h-0 p-2 md:p-3 overflow-hidden">
+        <div class="card p-2 md:p-6 h-full">
           <NetworkGraph
             ref="graphComponent"
             :graph-data="exampleGraph"

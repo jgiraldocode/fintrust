@@ -8,6 +8,9 @@
         <p class="text-xl text-gray-600">
           El juego comenzará pronto. Por favor espera...
         </p>
+        <p v-if="gameStore.activeSection" class="text-lg text-green-600 font-bold mt-2">
+          {{ gameStore.activeSection === 1 ? '🎯 Ronda 1' : '🎯 Ronda 2' }} activada - Redirigiendo...
+        </p>
       </div>
 
       <!-- Loading animation -->
@@ -83,7 +86,8 @@ onMounted(() => {
   }
 
   // Redirect to game if it's already active
-  if (gameStore.isGameActive) {
+  if (gameStore.activeSection !== null) {
+    console.log('Game already active, redirecting to /game')
     router.push('/game')
     return
   }
@@ -92,7 +96,10 @@ onMounted(() => {
   const checkGameState = async () => {
     try {
       const response = await getGameState()
-      gameStore.setGameActive(response.data.isActive)
+      console.log('Game state response:', response.data)
+      // Update store with active section (null or section number)
+      gameStore.setActiveSection(response.data.activeSection)
+      console.log('Active section updated to:', gameStore.activeSection)
     } catch (error) {
       console.error('Error checking game state:', error)
     }
@@ -101,16 +108,24 @@ onMounted(() => {
   // Initial check
   checkGameState()
 
-  // Check every 5 seconds
-  checkInterval = setInterval(checkGameState, 5000)
+  // Check every 2 seconds (reduced for better responsiveness)
+  checkInterval = setInterval(checkGameState, 2000)
 })
 
-// Watch for game state changes
-watch(() => gameStore.isGameActive, (isActive) => {
-  if (isActive) {
-    router.push('/game')
-  }
-})
+// Watch for game state changes - with deep and immediate options
+watch(
+  () => gameStore.activeSection,
+  (newValue, oldValue) => {
+    console.log('Watch triggered - Old:', oldValue, 'New:', newValue)
+    if (newValue !== null && newValue !== undefined) {
+      console.log('Section activated, redirecting to game...', newValue)
+      setTimeout(() => {
+        router.push('/game')
+      }, 100) // Small delay to ensure state is fully updated
+    }
+  },
+  { immediate: false, deep: false }
+)
 
 onUnmounted(() => {
   if (checkInterval) {

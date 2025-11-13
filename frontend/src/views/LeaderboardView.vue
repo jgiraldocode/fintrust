@@ -10,6 +10,31 @@
         </p>
       </div>
 
+      <!-- Round Tabs -->
+      <div class="flex justify-center gap-2 mb-6">
+        <button
+          @click="changeSection('combined')"
+          class="px-4 py-2 rounded-lg font-medium transition-all"
+          :class="selectedSection === 'combined' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+        >
+          🏆 Total
+        </button>
+        <button
+          @click="changeSection('1')"
+          class="px-4 py-2 rounded-lg font-medium transition-all"
+          :class="selectedSection === '1' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+        >
+          🎯 Ronda 1
+        </button>
+        <button
+          @click="changeSection('2')"
+          class="px-4 py-2 rounded-lg font-medium transition-all"
+          :class="selectedSection === '2' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+        >
+          🎯 Ronda 2
+        </button>
+      </div>
+
       <div v-if="loading" class="flex justify-center py-12">
         <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-primary-600"></div>
       </div>
@@ -131,6 +156,7 @@ const userStore = useUserStore()
 const leaderboard = ref([])
 const loading = ref(true)
 const error = ref('')
+const selectedSection = ref('combined')
 
 const currentUserRank = computed(() => {
   if (!userStore.userId) return null
@@ -197,13 +223,19 @@ const loadLeaderboard = async () => {
   error.value = ''
 
   try {
-    const response = await getLeaderboard()
+    const section = selectedSection.value === 'combined' ? 'combined' : selectedSection.value
+    const response = await getLeaderboard(section)
     leaderboard.value = response.data
   } catch (err) {
     error.value = err.response?.data?.error || 'No se pudo cargar la tabla de clasificación.'
   } finally {
     loading.value = false
   }
+}
+
+const changeSection = (section) => {
+  selectedSection.value = section
+  loadLeaderboard()
 }
 
 const refreshLeaderboard = () => {

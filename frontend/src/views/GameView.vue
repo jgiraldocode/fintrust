@@ -16,26 +16,36 @@
       </div>
     </div>
 
-    <!-- All questions completed message -->
-    <div v-else-if="allQuestionsCompleted" class="card">
-      <div class="text-center">
-        <div class="text-6xl mb-4">🎉</div>
-        <h2 class="text-2xl md:text-3xl font-bold text-green-600 mb-4">
-          ¡Felicidades!
-        </h2>
-        <p class="text-lg md:text-xl text-gray-700 mb-6">
-          Ya has completado todas las preguntas disponibles.
-        </p>
-        <div class="flex flex-col sm:flex-row gap-3 justify-center">
-          <button @click="router.push('/leaderboard')" class="btn-primary">
-            📊 Ver Clasificación
-          </button>
-          <button @click="goHome" class="btn-secondary">
-            🏠 Volver al Inicio
-          </button>
-        </div>
-      </div>
-    </div>
+            <!-- All questions completed message -->
+            <div v-else-if="allQuestionsCompleted" class="card">
+              <div class="text-center">
+                <div class="text-6xl mb-4">🎉</div>
+                <h2 class="text-2xl md:text-3xl font-bold text-green-600 mb-4">
+                  ¡Ronda Completada!
+                </h2>
+                <div class="mb-6">
+                  <div
+                    class="inline-block px-6 py-3 rounded-lg mb-4"
+                    :class="gameStore.activeSection === 2 ? 'bg-green-100 border-2 border-green-500' : 'bg-blue-100 border-2 border-blue-500'"
+                  >
+                    <p class="text-2xl font-bold" :class="gameStore.activeSection === 2 ? 'text-green-800' : 'text-blue-800'">
+                      {{ gameStore.activeSection === 2 ? '🎯 Ronda 2' : '🎯 Ronda 1' }} Finalizada
+                    </p>
+                  </div>
+                  <p class="text-lg md:text-xl text-gray-700">
+                    Has completado todas las preguntas de esta ronda.
+                  </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                  <button @click="router.push('/leaderboard')" class="btn-primary">
+                    📊 Ver Clasificación
+                  </button>
+                  <button @click="goHome" class="btn-secondary">
+                    🏠 Volver al Inicio
+                  </button>
+                </div>
+              </div>
+            </div>
 
     <div v-else-if="currentQuestion" class="space-y-3 md:space-y-4 relative">
       <!-- Indicador compacto de progreso - Flotante en la esquina inferior derecha (oculto durante tutorial) -->
@@ -66,9 +76,18 @@
 
       <!-- Question and options - Grande y legible en móvil -->
       <div class="card p-4 md:p-6">
-        <h3 class="text-xl md:text-2xl font-bold text-gray-800 mb-4 md:mb-6">
-          {{ currentQuestion.questionText }}
-        </h3>
+        <div class="flex items-start gap-3 mb-4 md:mb-6">
+          <h3 class="text-xl md:text-2xl font-bold text-gray-800 flex-1">
+            {{ currentQuestion.questionText }}
+          </h3>
+          <span
+            v-if="currentQuestion.section"
+            class="px-3 py-1 rounded-full text-sm font-bold flex-shrink-0"
+            :class="currentQuestion.section === 2 ? 'bg-green-200 text-green-800' : 'bg-blue-200 text-blue-800'"
+          >
+            {{ currentQuestion.section === 2 ? '🎯 R2' : '🎯 R1' }}
+          </span>
+        </div>
 
         <div class="space-y-3 md:space-y-4">
           <button
