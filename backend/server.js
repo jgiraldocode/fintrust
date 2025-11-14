@@ -24,7 +24,7 @@ const corsOptions = {
     // Check if origin is allowed
     const isAllowed = allowedOrigins.some(allowedOrigin => {
       // Exact match or contains vercel.app (for preview deployments)
-      return origin === allowedOrigin || 
+      return origin === allowedOrigin ||
              (origin && origin.includes('.vercel.app')) ||
              process.env.NODE_ENV === 'development';
     });
@@ -65,9 +65,20 @@ app.use((err, req, res, next) => {
 
 // Initialize database
 // For Vercel serverless, we initialize on each cold start
+let dbInitialized = false;
+
+const initializeDb = async () => {
+  if (!dbInitialized) {
+    await db.initialize();
+    dbInitialized = true;
+    console.log('✅ Database initialized');
+  }
+};
+
 if (process.env.VERCEL) {
   console.log('🚀 Running on Vercel (Serverless)');
-  db.initialize().catch(err => {
+  // Initialize once on cold start
+  initializeDb().catch(err => {
     console.error('Failed to initialize database:', err);
   });
 } else {

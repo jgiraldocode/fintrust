@@ -3,7 +3,7 @@
     <div class="card w-full max-w-2xl">
       <div class="text-center mb-8">
         <h2 class="text-3xl font-bold text-primary-700 mb-2">
-          ¡Bienvenido, {{ userStore.userName }}! 👋
+          ¡Bienvenido, <span class="inline-block max-w-full truncate px-1">{{ userStore.userName }}</span>! 👋
         </h2>
         <p class="text-xl text-gray-600">
           El juego comenzará pronto. Por favor espera...

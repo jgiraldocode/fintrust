@@ -20,8 +20,8 @@
           </div>
 
           <!-- QR Code -->
-          <div class="bg-white p-8 rounded-2xl inline-block shadow-2xl mb-8 animate-pulse-glow">
-            <canvas ref="qrcodeCanvas" class="mx-auto"></canvas>
+          <div class="bg-white p-4 md:p-8 rounded-2xl inline-block shadow-2xl mb-8 animate-pulse-glow max-w-full">
+            <canvas ref="qrcodeCanvas" class="mx-auto max-w-full h-auto"></canvas>
           </div>
 
           <!-- Instructions -->
@@ -95,8 +95,12 @@ onMounted(async () => {
   console.log('Generating QR code for:', registrationUrl)
 
   try {
+    // Make QR code responsive - smaller on mobile
+    const isMobile = window.innerWidth < 768
+    const qrSize = isMobile ? Math.min(window.innerWidth - 80, 240) : 280
+
     await QRCode.toCanvas(qrcodeCanvas.value, registrationUrl, {
-      width: 280,
+      width: qrSize,
       margin: 2,
       color: {
         dark: '#0369a1',
