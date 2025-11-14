@@ -2,10 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 
-// Use Turso-compatible DB in production, SQLite locally
-const db = process.env.TURSO_DATABASE_URL
-  ? require('./database/db-turso')
-  : require('./database/db');
+// Database module (auto-selects Turso or SQLite based on environment)
+const db = require('./database/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

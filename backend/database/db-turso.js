@@ -121,7 +121,56 @@ const initialize = async () => {
   }
 };
 
-const getDb = () => db;
+// Create a SQLite-compatible wrapper for Turso
+const getDb = () => {
+  return {
+    // SELECT query (single row)
+    get: (sql, params, callback) => {
+      if (typeof params === 'function') {
+        callback = params;
+        params = [];
+      }
+      
+      db.execute({ sql, args: params || [] })
+        .then(result => {
+          callback(null, result.rows[0] || null);
+        })
+        .catch(err => callback(err));
+    },
+
+    // SELECT query (all rows)
+    all: (sql, params, callback) => {
+      if (typeof params === 'function') {
+        callback = params;
+        params = [];
+      }
+      
+      db.execute({ sql, args: params || [] })
+        .then(result => {
+          callback(null, result.rows);
+        })
+        .catch(err => callback(err));
+    },
+
+    // INSERT/UPDATE/DELETE query
+    run: (sql, params, callback) => {
+      if (typeof params === 'function') {
+        callback = params;
+        params = [];
+      }
+      
+      db.execute({ sql, args: params || [] })
+        .then(result => {
+          // SQLite-compatible result with lastID and changes
+          callback.call({ lastID: result.lastInsertRowid, changes: result.rowsAffected }, null);
+        })
+        .catch(err => callback(err));
+    },
+
+    // Direct access to Turso client for advanced operations
+    _tursoClient: db
+  };
+};
 
 module.exports = {
   initialize,
