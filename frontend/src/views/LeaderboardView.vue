@@ -89,10 +89,12 @@
                 </div>
 
                 <div class="flex-1 min-w-0">
-                  <p class="font-bold text-lg truncate" :class="entry.id === userStore.userId ? 'text-primary-900' : 'text-gray-900'">
-                    {{ entry.name }}
-                    <span v-if="entry.id === userStore.userId" class="text-sm text-primary-600">(Tú)</span>
-                  </p>
+                  <div class="flex items-center gap-1 flex-wrap">
+                    <p class="font-bold text-lg truncate max-w-[150px] md:max-w-[250px]" :class="entry.id === userStore.userId ? 'text-primary-900' : 'text-gray-900'">
+                      {{ entry.name }}
+                    </p>
+                    <span v-if="entry.id === userStore.userId" class="text-sm text-primary-600 font-bold flex-shrink-0">(Tú)</span>
+                  </div>
                   <p class="text-sm text-gray-600">
                     Posición #{{ entry.rank }}
                   </p>

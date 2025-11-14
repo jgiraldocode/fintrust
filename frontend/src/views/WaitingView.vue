@@ -1,10 +1,14 @@
 <template>
   <div class="container-mobile min-h-screen flex flex-col items-center justify-center py-8">
     <div class="card w-full max-w-2xl">
-      <div class="text-center mb-8">
-        <h2 class="text-3xl font-bold text-primary-700 mb-2">
-          ¡Bienvenido, <span class="inline-block max-w-full truncate px-1">{{ userStore.userName }}</span>! 👋
-        </h2>
+      <div class="text-center mb-8 px-4">
+        <div class="text-3xl font-bold text-primary-700 mb-2">
+          <div class="flex items-center justify-center gap-1 flex-wrap">
+            <span>¡Bienvenido,</span>
+            <span class="truncate max-w-[200px] md:max-w-xs">{{ userStore.userName }}</span>
+            <span>! 👋</span>
+          </div>
+        </div>
         <p class="text-xl text-gray-600">
           El juego comenzará pronto. Por favor espera...
         </p>

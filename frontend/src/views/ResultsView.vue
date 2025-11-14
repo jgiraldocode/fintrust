@@ -10,9 +10,12 @@
           {{ isSuccess ? '¡Felicitaciones!' : '¡Buena Suerte la Próxima!' }}
         </h2>
 
-        <p class="text-xl text-gray-600 px-4">
-          <span class="inline-block max-w-full truncate">{{ userName }}</span>, ¡has completado el cuestionario!
-        </p>
+        <div class="text-xl text-gray-600 px-4">
+          <div class="flex items-center justify-center gap-1 flex-wrap">
+            <span class="truncate max-w-[200px] md:max-w-xs">{{ userName }}</span>
+            <span>, ¡has completado el cuestionario!</span>
+          </div>
+        </div>
       </div>
 
       <!-- Score Summary -->
