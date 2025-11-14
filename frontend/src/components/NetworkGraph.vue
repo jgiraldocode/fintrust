@@ -183,8 +183,9 @@ const initGraph = () => {
     .style('filter', 'drop-shadow(0 4px 12px rgba(139, 92, 246, 0.4))')
 
   // Add emoji inside the circle (bigger for person)
+  // Soporta emoji personalizado en el nodo o usa el del tipo
   node.append('text')
-    .text(d => nodeTypes[d.type]?.emoji || '❓')
+    .text(d => d.emoji || nodeTypes[d.type]?.emoji || '❓')
     .attr('x', 0)
     .attr('y', 0)
     .attr('text-anchor', 'middle')
