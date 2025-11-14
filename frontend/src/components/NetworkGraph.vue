@@ -177,7 +177,7 @@ const initGraph = () => {
     .attr('fill', d => d.type === 'person'
       ? nodeTypes[d.type]?.color || '#6b7280'  // Person con fondo sólido
       : 'transparent')  // Otros con fondo transparente
-    .attr('stroke', d => nodeTypes[d.type]?.color || '#6b7280')
+    .attr('stroke', '#000000')  // Borde negro para todos los nodos
     .attr('stroke-width', d => d.type === 'person' ? 3 : 4)  // Borde más grueso para no-person
     .attr('stroke-opacity', d => d.type === 'person' ? 0.5 : 1)  // Borde completamente opaco para no-person
     .style('filter', 'drop-shadow(0 4px 12px rgba(139, 92, 246, 0.4))')
