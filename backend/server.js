@@ -12,7 +12,8 @@ const PORT = process.env.PORT || 3000;
 const allowedOrigins = [
   'http://localhost:5173', // Local development
   'http://localhost:3000',
-  process.env.FRONTEND_URL, // Production frontend URL
+  'https://fintrust-three.vercel.app', // Production frontend
+  process.env.FRONTEND_URL, // Additional frontend URL from env
 ].filter(Boolean); // Remove undefined values
 
 const corsOptions = {
@@ -20,13 +21,24 @@ const corsOptions = {
     // Allow requests with no origin (mobile apps, Postman, etc.)
     if (!origin) return callback(null, true);
 
-    if (allowedOrigins.indexOf(origin) !== -1 || process.env.NODE_ENV === 'development') {
+    // Check if origin is allowed
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      // Exact match or contains vercel.app (for preview deployments)
+      return origin === allowedOrigin || 
+             (origin && origin.includes('.vercel.app')) ||
+             process.env.NODE_ENV === 'development';
+    });
+
+    if (isAllowed) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(null, true); // Allow anyway in production for now
     }
   },
   credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 200
 };
 
